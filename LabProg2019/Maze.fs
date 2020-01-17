@@ -109,12 +109,13 @@ type Maze (width, height) =
                  else
                     raise InvalidInsertionException
     
+    member this.toSprite () =
+        sprite(image(width,height,this.convertToPixel ()),0,0,0)
+
     member this.generate () =
         this.initialize ()
         this.maze.[this.finish.x,this.finish.y].isVisited <- true
         this.maze.[this.finish.x,this.finish.y].isExit <- true
         this.maze.[this.start.x,this.start.y].isVisited <- true
         this.maze.[this.start.x,this.start.y].isEntrance <- true
-
-        sprite(image(width,height,this.convertToPixel ()),0,0,0)
 

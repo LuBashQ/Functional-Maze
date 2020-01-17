@@ -72,6 +72,7 @@
     <Compile Include="Maze.fs" />
     <Compile Include="Scene.fs" />
     <Compile Include="TreeMaze.fs" />
+    <Compile Include="Actions.fs" />
     <Compile Include="Test.fs" />
     <Compile Include="Game.fs" />
     <Compile Include="Main.fs" />

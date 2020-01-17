@@ -97,17 +97,20 @@ type engine (w : int, h : int, ?fps_cap : int, ?flip_queue) =
                     let hd = sprintf "frame count: %d\nframe time: %.1f ms (%.1f fps)" data.frame_cnt data.elapsed.TotalMilliseconds (float data.frame_cnt / dt.TotalSeconds)
                     wr.draw_text (hd, 0, 0, Color.Yellow, Color.Blue)
         { data with frame_cnt = data.frame_cnt + 1; elapsed = ts }
+    
 
+    //leggera modifica per forzare l'esecuzione di update per mostrare il menu correttamente
     member this.loop_on_key update =
         Log.msg "entering engine on-key loop..."
         let mutable data = { frame_cnt = 0; elapsed = new TimeSpan (); now = DateTime.Now }
-        data <- this.shoot (fun _ -> ()) data
+        //data <- this.shoot (fun _ -> ()) data
+        data <- this.shoot (update (Some (ConsoleKeyInfo()))) data
         while not isEnd do
             let k = Console.ReadKey true
             Log.debug "engine: key pressed: %c" k.KeyChar
-            data <- this.shoot (update k) data
+            data <- this.shoot (update (Some k)) data
 
-    member this.loop update st0 =
+    member this.loop update =
         let interval = 1000. / float fps_cap
         Log.msg "entering engine loop: timer interval=%g ms" interval
         use timer = new Timers.Timer (Interval = interval, Enabled = true, AutoReset = true)
