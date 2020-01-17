@@ -69,8 +69,5 @@ let main argv =
     if argv.Length > 0 then 
         main_log_server ()
     else
-        let code = main_game ()
-        Console.Write "Press any key to quit..."
-        Console.ReadKey () |> ignore
-        code
+        main_game ()
     #endif
