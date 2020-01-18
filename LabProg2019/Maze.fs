@@ -7,12 +7,7 @@
 module LabProg2019.Maze
 
 open System.Collections.Generic
-open External
 open Gfx
-open Engine
-open System
-open System.Text
-
 
 
 type Cell (_x: int, _y: int, _mazeW: int, _mazeH: int) =
@@ -46,25 +41,24 @@ exception InvalidInsertionException
 
 type Maze (width, height) =
     
-    let random = Random()
-    let rnd = random.Next(1,width)
-    let y = if  rnd % 2 <> 0 then rnd else rnd - 1
-    let s,e = random.Next(4),random.Next(4)
+    let rnd = rnd_int 1 (width - 1)
+    let yAxisPosition = if  rnd % 2 <> 0 then rnd else rnd - 1
+    let e = rnd_int 0 3
+
     member val width = width with get
     member val height = height with get
-
     member val maze = Array2D.init width height (fun x y -> Cell (x,y,width,height)) with get,set
     member val pixelMap = Array2D.init width height (fun x y -> pixel.empty)
     
     member private this.getHole (n) =
         [   
-            this.maze.[1,y]
-            this.maze.[y,1]
-            this.maze.[(height - 2), y]
-            this.maze.[y,width - 2]
+            this.maze.[1,yAxisPosition]
+            this.maze.[yAxisPosition,1]
+            this.maze.[(height - 2), yAxisPosition]
+            this.maze.[yAxisPosition,width - 2]
         ].[n]
     
-    member this.start = this.getHole (s)
+    member this.start = this.maze.[1,1]
     member this.finish = this.getHole (e)
 
     member this.convertToPixel () =
@@ -114,8 +108,6 @@ type Maze (width, height) =
 
     member this.generate () =
         this.initialize ()
-        this.maze.[this.finish.x,this.finish.y].isVisited <- true
         this.maze.[this.finish.x,this.finish.y].isExit <- true
-        this.maze.[this.start.x,this.start.y].isVisited <- true
         this.maze.[this.start.x,this.start.y].isEntrance <- true
 
