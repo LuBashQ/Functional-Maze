@@ -9,14 +9,12 @@ module LabProg2019.Maze
 open System.Collections.Generic
 open Gfx
 
-
 type Cell (_x: int, _y: int, _mazeW: int, _mazeH: int) =
     member val x = _x with get,set
     member val y = _y with get,set
     member val mazeW = _mazeW
     member val mazeH = _mazeH
     member val isVisited = false with get,set
-    member val isEntrance = false with get,set
     member val isExit = false with get,set
     member val isPath = false with get,set
     member val isDeadEnd = false with get,set
@@ -43,34 +41,22 @@ type Maze (width, height) =
     
     let rnd = rnd_int 1 (width - 1)
     let yAxisPosition = if  rnd % 2 <> 0 then rnd else rnd - 1
-    let e = rnd_int 0 3
 
     member val width = width with get
     member val height = height with get
     member val maze = Array2D.init width height (fun x y -> Cell (x,y,width,height)) with get,set
     member val pixelMap = Array2D.init width height (fun x y -> pixel.empty)
-    
-    member private this.getHole (n) =
-        [   
-            this.maze.[1,yAxisPosition]
-            this.maze.[yAxisPosition,1]
-            this.maze.[(height - 2), yAxisPosition]
-            this.maze.[yAxisPosition,width - 2]
-        ].[n]
-    
     member this.start = this.maze.[1,1]
-    member this.finish = this.getHole (e)
+    member this.finish = this.maze.[width - 2,yAxisPosition]
 
     member this.convertToPixel () =
         for x = 0 to (width-1) do
             for y = 0 to (height-1) do
                 if this.maze.[x,y].isVisited then
-                    if this.maze.[x,y].isEntrance then 
-                        this.pixelMap.SetValue (pixel.create('\219',Color.DarkCyan),x,y)
-                    else if this.maze.[x,y].isExit then 
-                        this.pixelMap.SetValue (pixel.create('\219',Color.DarkYellow),x,y)
+                    if this.maze.[x,y].isExit then 
+                        this.pixelMap.SetValue (pixel.create('\219',Color.Cyan),x,y)
                     else if this.maze.[x,y].isPath then 
-                        this.pixelMap.SetValue (pixel.create('\219',Color.DarkGreen),x,y)
+                        this.pixelMap.SetValue (pixel.create('\219',Color.DarkMagenta),x,y)
                     else
                     this.pixelMap.SetValue (pixel.create('\219',Color.Black),x,y)
                 else 
@@ -109,5 +95,3 @@ type Maze (width, height) =
     member this.generate () =
         this.initialize ()
         this.maze.[this.finish.x,this.finish.y].isExit <- true
-        this.maze.[this.start.x,this.start.y].isEntrance <- true
-

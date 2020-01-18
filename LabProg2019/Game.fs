@@ -7,9 +7,9 @@ open Scene
 open Actions
 
 let main () =     
-    let W = 25
-    let H = 25
-    let engine = new engine (W+1, H+1)
+    let W = 51
+    let H = 51
+    let engine = new engine (W+1,H+1)
     let player = sprite(image.rectangle(1,1,pixel.filled Color.Red),1,1,1)
 
     let maze = Game("play",Some player,None,generateMaze,None,(W,H))

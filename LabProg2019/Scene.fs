@@ -63,6 +63,7 @@ type SceneManager (_states: State list, _engine: engine) =
                                     else
                                         this.addScene ("solve",showSolution,true,pg=p.Value,maze=m.Value,size=s)
                                         this.changeScene ("solve",wr)
+                                        this.states <- this.deleteScene "solve"
                                 | Menu(_,_,_,t,_) -> this.currentScene <- Some (this.currentScene.Value.move (key.Value,wr,t))
             | ConsoleKey.Q -> engine.quit ()
             | ConsoleKey.M -> this.changeScene ("menu",wr)
@@ -70,7 +71,6 @@ type SceneManager (_states: State list, _engine: engine) =
                                 | Menu(active = a) -> let name = (List.item a this.currentScene.Value.text).ToLower ()
                                                       this.changeScene (name,wr)
                                 | _ -> ()
-
             | _ -> this.currentScene <- Some(
                     match this.currentScene.Value with
                     | Game(_,_,_,_,_,_) -> this.currentScene.Value.move key.Value

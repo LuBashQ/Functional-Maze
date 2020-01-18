@@ -15,12 +15,13 @@ let rec getChildren (root: Tree, maze: Cell[,]) =
     else root.children <- root.value.children(maze,root.parent.Value.value)
 
 let rec retrievePath (root: Tree option, maze: Maze) =
-    if (root.Value.parent = None) then []
+    if (root.Value.parent = None) then [root.Value.value]
     else root.Value.value::retrievePath(root.Value.parent,maze)
 
 
 let buildPath (root: Tree option, maze: Maze) =
-    if root = None then maze
+    if root = None then 
+        maze
     else
         let path = retrievePath (root, maze)
         for p in path do
@@ -69,7 +70,7 @@ let rec findHierarchy (maze: Maze, queue: Queue<Tree>) =
                     queue.Enqueue(root)
                 findHierarchy (maze,queue)
 
-let rec solveRecursive (maze: Maze) =
+let rec solveRecursive (maze: Maze)=
     let tree = {
         parent = None; value = maze.start; children = []
     }
