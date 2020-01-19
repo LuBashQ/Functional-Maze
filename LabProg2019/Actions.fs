@@ -91,13 +91,13 @@ let solveMaze (st: State) (key: ConsoleKeyInfo) : State =
 
 let drawText (s: string) (index: int) (color:ConsoleColor) (wr: wronly_raster) (size: int*int)  : unit =
     let x,y = size
-    wr.draw_text((sprintf "%s\n" s),(x - s.Length) / 2,(y + index) / 2,color)
+    wr.draw_text((sprintf "%s\n\n" s),(x - s.Length) / 2,(y/2 + index),color)
 
 let rec showMenu (st: State) (key: ConsoleKeyInfo)  (wr: wronly_raster) (ls: string list) (size: int*int) : State =
     
     let idx = match key.Key with
-                | ConsoleKey.S -> abs (st.active - 1) % (List.length ls)
-                | ConsoleKey.W -> (st.active + 1) % (List.length ls)
+                | ConsoleKey.S -> (st.active + 1) % (List.length ls)
+                | ConsoleKey.W -> abs (st.active - 1) % (List.length ls)
                 | _ -> st.active
     
     

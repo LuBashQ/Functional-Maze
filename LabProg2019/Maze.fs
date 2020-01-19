@@ -27,6 +27,12 @@ type Cell (_x: int, _y: int, _mazeW: int, _mazeH: int) =
             if checkMatrixBounds (this.x, this.y + 2,this.mazeW,this.mazeH) then maze.[this.x, this.y + 2]
         ] |> List.filter (fun cell -> not cell.isVisited)
 
+    member this.nwNeighbors (maze: Cell[,]) =
+        [   
+            if checkMatrixBounds (this.x - 2, this.y,this.mazeW,this.mazeH) then maze.[this.x - 2, this.y]
+            if checkMatrixBounds (this.x, this.y - 2,this.mazeW,this.mazeH) then maze.[this.x, this.y - 2]
+        ] |> List.filter (fun cell -> not cell.isVisited)
+
     member this.children (maze: Cell[,], parent: Cell) =
         [   
             if checkMatrixBounds (this.x - 1, this.y,this.mazeW,this.mazeH) then maze.[this.x - 1, this.y]
@@ -88,7 +94,7 @@ type Maze (width, height) =
                         this.maze.[current.x + 1,current.y].isVisited <- true
                  else
                     raise InvalidInsertionException
-    
+
     member this.toSprite () =
         sprite(image(width,height,this.convertToPixel ()),0,0,0)
 

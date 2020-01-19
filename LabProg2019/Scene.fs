@@ -19,6 +19,15 @@ type SceneManager (_gameStates: State list, _engine: engine) =
         | Game(n,_,_,mv,_,size) -> Game(n,Some player,None,mv,None,size)
         | _ -> s
 
+    member private this.setSize s size =
+        let player = sprite(image.rectangle(1,1,pixel.filled Color.Red),1,1,1)
+        match s with
+        | Game(n,_,_,mv,_,_) -> Game(n,Some player,None,mv,None,(size,size))
+        | _ -> s
+    
+    member private this.setGameSize size =
+        this.gameStates <- List.map(fun (s:State) -> this.setSize s size) this.gameStates 
+
     member private this.resetGame () =
         this.gameStates <- List.map(fun (s:State) -> this.resetState s) this.gameStates 
 
@@ -77,10 +86,20 @@ type SceneManager (_gameStates: State list, _engine: engine) =
             | ConsoleKey.M -> 
                 this.changeScene ("menu",wr)
             | ConsoleKey.F -> match this.currentScene.Value with
-                                | Menu(active = a) -> let name = (List.item a this.currentScene.Value.text).ToLower ()
-                                                      //Continue non definito ancora, serve per prevenire il reset del gioco
-                                                      if not (name = "continue") then this.resetGame ()
-                                                      this.changeScene (name,wr)
+                                | Menu(active = a) -> 
+                                    if this.currentScene.Value.name = "size" then
+                                        if  not (a = this.currentScene.Value.text.Length - 1) then
+                                            let size = int (List.item a this.currentScene.Value.text) + 1
+                                            this.setGameSize size
+                                            this.changeScene ("size",wr)
+                                        else
+                                            let name = (List.item a this.currentScene.Value.text).ToLower ()
+                                            this.changeScene (name,wr)
+                                    else
+                                        let name = (List.item a this.currentScene.Value.text).ToLower ()
+                                        //Continue non definito ancora, serve per prevenire il reset del gioco
+                                        if not (name = "continue") then this.resetGame ()
+                                        this.changeScene (name,wr)
                                 | _ -> ()
             | _ -> this.currentScene <- Some(
                     match this.currentScene.Value with
