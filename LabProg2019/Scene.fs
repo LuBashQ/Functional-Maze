@@ -19,14 +19,14 @@ type SceneManager (_gameStates: State list, _engine: engine) =
         | Game(n,_,_,mv,_,size) -> Game(n,Some player,None,mv,None,size)
         | _ -> s
 
-    member private this.setSize s size =
+    member private this.setSize (s,size,?pos) =
         let player = sprite(image.rectangle(1,1,pixel.filled Color.Red),1,1,1)
         match s with
         | Game(n,_,_,mv,_,_) -> Game(n,Some player,None,mv,None,(size,size))
-        | _ -> s
+        | Menu(n,bg,mv,ls,a,size) -> Menu(n,bg,mv,ls,pos.Value,size)
     
-    member private this.setGameSize size =
-        this.gameStates <- List.map(fun (s:State) -> this.setSize s size) this.gameStates 
+    member private this.setGameSize size pos =
+        this.gameStates <- List.map(fun (s:State) -> this.setSize (s,size,pos)) this.gameStates 
 
     member private this.resetGame () =
         this.gameStates <- List.map(fun (s:State) -> this.resetState s) this.gameStates 
@@ -65,7 +65,8 @@ type SceneManager (_gameStates: State list, _engine: engine) =
             this.engine.register_sprite p.Value
             this.engine.register_sprite this.currentScene.Value.background
         | Menu(_,bg,_,t,_,_) -> 
-            this.engine.register_sprite bg.Value; 
+            if bg <> None then
+                this.engine.register_sprite bg.Value; 
             this.currentScene <- Some (this.currentScene.Value.move (ConsoleKeyInfo(),wr.Value,t))
 
 
@@ -90,7 +91,7 @@ type SceneManager (_gameStates: State list, _engine: engine) =
                                     if this.currentScene.Value.name = "size" then
                                         if  not (a = this.currentScene.Value.text.Length - 1) then
                                             let size = int (List.item a this.currentScene.Value.text) + 1
-                                            this.setGameSize size
+                                            this.setGameSize size a
                                             this.changeScene ("size",wr)
                                         else
                                             let name = (List.item a this.currentScene.Value.text).ToLower ()

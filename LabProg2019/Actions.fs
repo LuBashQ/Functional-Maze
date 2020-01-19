@@ -62,10 +62,10 @@ let check_bounds (st:State) (dx: float, dy: float)=
 let movePlayer (st: State) (key: ConsoleKeyInfo): State =
     let dx,dy =
         match key.Key with
-        | ConsoleKey.W -> 0.,-1.
-        | ConsoleKey.S -> 0.,1.
-        | ConsoleKey.A -> -1.,0.
-        | ConsoleKey.D -> 1.,0.
+        | ConsoleKey.W | ConsoleKey.UpArrow -> 0.,-1.
+        | ConsoleKey.S | ConsoleKey.DownArrow -> 0.,1.
+        | ConsoleKey.A | ConsoleKey.LeftArrow -> -1.,0.
+        | ConsoleKey.D | ConsoleKey.RightArrow -> 1.,0.
         | _ -> 0.,0.
 
     let x,y = check_bounds st (dx,dy)
@@ -91,15 +91,14 @@ let solveMaze (st: State) (key: ConsoleKeyInfo) : State =
 
 let drawText (s: string) (index: int) (color:ConsoleColor) (wr: wronly_raster) (size: int*int)  : unit =
     let x,y = size
-    wr.draw_text((sprintf "%s\n\n" s),(x - s.Length) / 2,(y/2 + index),color)
+    wr.draw_text((sprintf "%s\n\n" s),x/2-2,(y/2 + index),color)
 
 let rec showMenu (st: State) (key: ConsoleKeyInfo)  (wr: wronly_raster) (ls: string list) (size: int*int) : State =
     
     let idx = match key.Key with
-                | ConsoleKey.S -> (st.active + 1) % (List.length ls)
-                | ConsoleKey.W -> abs (st.active - 1) % (List.length ls)
+                | ConsoleKey.S | ConsoleKey.DownArrow -> (st.active + 1) % (List.length ls)
+                | ConsoleKey.W | ConsoleKey.UpArrow -> abs (((st.active - 1) + List.length ls) % (List.length ls))
                 | _ -> st.active
-    
     
     let rec aux ls i idx=
         match ls with
@@ -111,7 +110,7 @@ let rec showMenu (st: State) (key: ConsoleKeyInfo)  (wr: wronly_raster) (ls: str
                    aux xs (i+1) idx
 
     aux ls 0 idx
-    Menu(st.name,Some st.background,showMenu,st.text,idx,size)
+    Menu(st.name,None,showMenu,st.text,idx,size)
 
 let showSolution (st: State) (key: ConsoleKeyInfo) : State =
     let solved = solveRecursive st.maze

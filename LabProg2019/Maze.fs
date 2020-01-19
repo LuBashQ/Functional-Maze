@@ -8,6 +8,7 @@ module LabProg2019.Maze
 
 open System.Collections.Generic
 open Gfx
+open System
 
 type Cell (_x: int, _y: int, _mazeW: int, _mazeH: int) =
     member val x = _x with get,set
@@ -63,8 +64,6 @@ type Maze (width, height) =
                         this.pixelMap.SetValue (pixel.create('\219',Color.Cyan),x,y)
                     else if this.maze.[x,y].isPath then 
                         this.pixelMap.SetValue (pixel.create('\219',Color.DarkMagenta),x,y)
-                    else
-                    this.pixelMap.SetValue (pixel.create('\219',Color.Black),x,y)
                 else 
                     this.pixelMap.SetValue (pixel.create('\219',Color.White),x,y)
         

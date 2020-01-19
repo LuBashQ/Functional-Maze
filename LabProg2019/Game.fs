@@ -14,9 +14,9 @@ let main () =
 
     let maze = Game("play",Some player,None,generateMaze,None,(W,H))
     let solved = Game("solved",Some player,None,solveMaze,None,(W,H))
-    let menu = Menu("menu",Some (sprite(image.rectangle(0,0,pixel.filled Color.Blue),0,0,-10)),showMenu,["PLAY";"SOLVED";"OPTIONS"],0,(W,H))
-    let options = Menu("options",Some (sprite(image.rectangle(0,0,pixel.filled Color.Blue),0,0,-10)),showMenu,["SIZE";"MENU"],0,(W,H))     
-    let size = Menu("size",Some (sprite(image.rectangle(0,0,pixel.filled Color.Blue),0,0,-10)),showMenu,["20";"30";"40";"50";"OPTIONS"],0,(W,H))     
+    let menu = Menu("menu",None,showMenu,["PLAY";"SOLVED";"OPTIONS"],0,(W,H))
+    let options = Menu("options",None,showMenu,["SIZE";"MENU"],0,(W,H))     
+    let size = Menu("size",None,showMenu,["20";"30";"40";"50";"OPTIONS"],3,(W,H))  
 
     let sceneManager = SceneManager([menu;maze;solved;options;size],engine)
 
