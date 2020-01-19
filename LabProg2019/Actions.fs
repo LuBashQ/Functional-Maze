@@ -7,16 +7,11 @@ open TreeMaze
 
 type State =
     | Game of name:string * pg:sprite option * bg:sprite option * move:(State -> ConsoleKeyInfo -> State) * maze: Maze option * size: (int * int)
-    | Menu of name:string * bg:sprite option * move:(State -> ConsoleKeyInfo -> wronly_raster -> string list -> State) * voices:string list * active: int
+    | Menu of name:string * bg:sprite option * move:(State -> ConsoleKeyInfo -> wronly_raster -> string list -> (int*int) -> State) * voices:string list * active: int * size: (int*int)
 
     member this.name =
         match this with
         | Game(name = n) | Menu(name = n) -> n.ToLower()
-
-    member this.player =
-        match this with
-        | Game(pg = p) -> p
-        | _ -> failwith "Player non definito"
 
     member this.background =
         match this with
@@ -27,6 +22,11 @@ type State =
         match this with
         | Menu(active = a) -> a
         | _ -> -1
+
+    member this.player =
+        match this with
+        | Game(pg = p) -> p
+        | _ -> failwith "Player non definito"
 
     member this.maze =
         match this with
@@ -41,12 +41,12 @@ type State =
     member this.size =
         match this with
         | Game(size = (x,y)) -> x,y
-        | _ -> failwith "Size non definito"
+        | Menu(size = (x,y)) -> x,y
 
     member this.move (k,?r:wronly_raster,?s:string list) =
         match this with
         | Game(move = n) -> n this k
-        | Menu(move = n) -> n this k r.Value this.text
+        | Menu(move = n;size = s) -> n this k r.Value this.text s
 
 let check_bounds (st:State) (dx: float, dy: float)=
     let vertical = int (st.player.Value.x + dx)
@@ -77,7 +77,7 @@ let generateMaze (st:State) (key: ConsoleKeyInfo) : State =
     let maze = new Maze(w,h)
     maze.generate ()
     let background = Some (maze.toSprite())
-    let newState = Game(st.name,st.player,background,movePlayer,Some maze,st.size)
+    let newState = Game("play",st.player,background,movePlayer,Some maze,(w,h))
     movePlayer newState key
 
 let solveMaze (st: State) (key: ConsoleKeyInfo) : State =
@@ -89,10 +89,11 @@ let solveMaze (st: State) (key: ConsoleKeyInfo) : State =
     let newState = Game(st.name,st.player,background,movePlayer,Some maze,st.size)
     movePlayer newState key
 
-let drawText (s: string) (index: int) (color:ConsoleColor) (wr: wronly_raster)  : unit =
-    wr.draw_text((sprintf "%s\n" s),0,index,color)
+let drawText (s: string) (index: int) (color:ConsoleColor) (wr: wronly_raster) (size: int*int)  : unit =
+    let x,y = size
+    wr.draw_text((sprintf "%s\n" s),(x - s.Length) / 2,(y + index) / 2,color)
 
-let rec showMenu (st: State) (key: ConsoleKeyInfo)  (wr: wronly_raster) (ls: string list) : State =
+let rec showMenu (st: State) (key: ConsoleKeyInfo)  (wr: wronly_raster) (ls: string list) (size: int*int) : State =
     
     let idx = match key.Key with
                 | ConsoleKey.S -> abs (st.active - 1) % (List.length ls)
@@ -104,18 +105,16 @@ let rec showMenu (st: State) (key: ConsoleKeyInfo)  (wr: wronly_raster) (ls: str
         match ls with
         | [] -> ()
         | x::xs -> if i = idx then 
-                    drawText x i ConsoleColor.Cyan wr
+                    drawText x i ConsoleColor.Cyan wr size
                    else
-                    drawText x i ConsoleColor.White wr
+                    drawText x i ConsoleColor.White wr size
                    aux xs (i+1) idx
 
     aux ls 0 idx
-    Menu(st.name,Some st.background,showMenu,st.text,idx)
+    Menu(st.name,Some st.background,showMenu,st.text,idx,size)
 
 let showSolution (st: State) (key: ConsoleKeyInfo) : State =
     let solved = solveRecursive st.maze
     let background = Some (solved.toSprite())
     let newState = Game(st.name,st.player,background,movePlayer,Some solved,st.size)
     movePlayer newState key
-
-
