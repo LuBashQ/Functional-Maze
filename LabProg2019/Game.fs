@@ -7,11 +7,13 @@ open Scene
 open Actions
 
 let main () =     
+    
     let W = 51
     let H = 51
     let engine = new engine (W,H)
     let player = sprite(image.rectangle(1,1,pixel.filled Color.Red),1,1,1)
 
+    // Generazione degli stati supportati dal gioco
     let maze = Game("play",Some player,None,generateMaze,None,(W,H))
     let solved = Game("solved",Some player,None,solveMaze,None,(W,H))
     let menu = Menu("menu",None,showMenu,["PLAY";"SOLVED";"OPTIONS"],0,(W,H))
@@ -20,4 +22,5 @@ let main () =
 
     let sceneManager = SceneManager([menu;maze;solved;options;size],engine)
 
+    // Esecuzione del gioco
     engine.loop_on_key <| sceneManager.execute engine

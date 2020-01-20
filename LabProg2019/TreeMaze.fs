@@ -3,6 +3,13 @@
 open System.Collections.Generic
 open Maze
 
+
+/// <summary>
+/// Tipo Tree
+/// </summary>
+/// <param name="parent">Il nodo padre</param>
+/// <param name="value">La cella contenuta nel nodo</param>
+/// <param name="children">I figli della cella</param>
 [<NoComparison>]
 type Tree = {
     parent : Tree option
@@ -10,24 +17,45 @@ type Tree = {
     mutable children : Cell list
 }
 
-let rec getChildren (root: Tree, maze: Cell[,]) =
-    if (root.parent = None) then root.children <- root.value.children(maze,root.value)
-    else root.children <- root.value.children(maze,root.parent.Value.value)
+/// <summary>
+/// Ricava tutti i figli di un nodo dell'albero
+/// </summary>
+/// <param name="node">Il nodo dell'albero</param>
+/// <param name="maze">La matrice che identifica il labirinto</param>
+let getChildren (node: Tree, maze: Cell[,]) =
+    if (node.parent = None) then node.children <- node.value.children(maze,node.value)
+    else node.children <- node.value.children(maze,node.parent.Value.value)
 
-let rec retrievePath (root: Tree option, maze: Maze) =
-    if (root.Value.parent = None) then [root.Value.value]
-    else root.Value.value::retrievePath(root.Value.parent,maze)
 
+/// <summary>
+/// Ricava ricorsivamente tutte le celle padre della foglia corrispondente all'uscita del labirinto
+/// </summary>
+/// <param name="leaf">La foglia dell'albero</param>
+/// <returns>Una lista di celle</returns>
+let rec retrievePath (leaf: Tree option) =
+    if (leaf.Value.parent = None) then [leaf.Value.value]
+    else leaf.Value.value::retrievePath(leaf.Value.parent)
 
+/// <summary>
+/// Modifica le celle della matrice in modo da rapprensentare la strada 
+/// </summary>
+/// <param name="root">La radice dell'albero</param>
+/// <param name="maze">La struttura dati del labirinto</param>
+/// <returns>la struttura dati del labirinto modificata</returns>
 let buildPath (root: Tree option, maze: Maze) =
     if root = None then 
         maze
     else
-        let path = retrievePath (root, maze)
+        let path = retrievePath (root)
         for p in path do
             maze.maze.[p.x,p.y].isPath <- true
         maze
 
+/// <summary>
+/// Algoritmo iterativo di risoluzione del labirinto basato sull'utilizzo di un albero n-ario
+/// </summary>
+/// <param name="maze">La struttura dati del labirinto</param>
+/// <returns>la struttura dati del labirinto modificata</returns>
 let solveIterative (maze: Maze) =
     let tree = {
         parent = None; value = maze.start; children = []
@@ -51,6 +79,13 @@ let solveIterative (maze: Maze) =
     
     buildPath (final,maze)
 
+
+/// <summary>
+/// Algoritmo di ricerca in profondità di un albero n-ario, usato per generare la gerarchia padre-figlio
+/// </summary>
+/// <param name="maze">La struttura dati del labirinto</param>
+/// <param name="queue">Una coda</param>
+/// <returns>La foglia corrispondente all'uscita del labirinto</returns>
 let rec findHierarchy (maze: Maze, queue: Queue<Tree>) =
     if queue.Count = 0 then None
     else
@@ -70,6 +105,12 @@ let rec findHierarchy (maze: Maze, queue: Queue<Tree>) =
                     queue.Enqueue(root)
                 findHierarchy (maze,queue)
 
+
+/// <summary>
+/// Algoritmo ricorsivo di risoluzione del labirinto, usando un albero n-ario
+/// </summary>
+/// <param name="maze">La struttura dati del labirinto</param>
+/// <returns>la struttura dati del labirinto modificata</returns>
 let rec solveRecursive (maze: Maze)=
     let tree = {
         parent = None; value = maze.start; children = []

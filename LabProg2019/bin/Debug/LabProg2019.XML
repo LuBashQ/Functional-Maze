@@ -104,5 +104,335 @@
  Calculates the intersection between the two given rectangles.
 </summary>
 </member>
+<member name="F:LabProg2019.Maze.Maze.yAxisPosition">
+<summary>Ricava una colonna disponibile per la creazione dell'uscita</summary>
+</member>
+<member name="M:LabProg2019.Maze.Maze.toSprite">
+ <summary>
+ Converte un array di pixel in uno sprite 
+ </summary>
+ <returns>Uno sprite contenente il labirinto</returns>
+ <seealso cref="this.convertToPixel"/>
+</member>
+<member name="M:LabProg2019.Maze.Maze.initialize">
+ <summary>
+ Implementazione dell'algoritmo "recursive backtracker", 
+ preso da https://en.wikipedia.org/wiki/Maze_generation_algorithm
+ </summary>
+ <exception cref="InvalidInsertionException">Viene lanciata quando la cella corrente e quella successiva
+ non hanno nè ascissa nè ordinata in comune
+ </exception>
+</member>
+<member name="M:LabProg2019.Maze.Maze.generate">
+ <summary>
+ Genera e imposta entrata e uscita del labirinto
+ </summary>
+ <seealso cref="this.initialize"/>
+</member>
+<member name="M:LabProg2019.Maze.Maze.convertToPixel">
+ <summary>
+ Converte una matrice di Cell in un array di CharInfo
+ </summary>
+ <returns>Una un array di CharInfo</returns>
+</member>
+<member name="T:LabProg2019.Maze.Maze">
+ <summary>
+ Tipo Maze
+ </summary>
+ <param name="width">La larghezza del labirinto</param>
+ <param name="heigth">L'altezza del labirinto</param>
+</member>
+<member name="M:LabProg2019.Maze.Cell.neighbors(LabProg2019.Maze.Cell[0:, 0:])">
+ <summary>
+ Controlla e ritorna i possibili vicini della cella
+ </summary>
+ <param name="maze">La matrice di celle in cui si trova</param>
+ <returns>Una Cell list contenente i vicini della cella</returns>
+</member>
+<member name="M:LabProg2019.Maze.Cell.children(LabProg2019.Maze.Cell[0:, 0:],LabProg2019.Maze.Cell)">
+ <summary>
+ Controlla e ritorna i possibili figli della cella (ovvero le celle non-muro vicine)
+ </summary>
+ <param name="maze">La matrice di celle in cui si trova</param>
+ <param name="parent">La cella padre</param>
+ <returns>Una Cell list contenente i figli della cella</returns>
+</member>
+<member name="T:LabProg2019.Maze.Cell">
+ <summary>
+ Tipo Cella
+ </summary>
+ <param name="_x">L'ascissa della cella</param>
+ <param name="_y">L'ordinata della cella</param>
+ <param name="_mazeW">La larghezza del labirinto</param>
+ <param name="_mazeH">L'altezza del labirinto</param>
+</member>
+<member name="T:LabProg2019.TreeMaze.Tree">
+ <summary>
+ Tipo Tree
+ </summary>
+ <param name="parent">Il nodo padre</param>
+ <param name="value">La cella contenuta nel nodo</param>
+ <param name="children">I figli della cella</param>
+</member>
+<member name="M:LabProg2019.TreeMaze.solveRecursive(LabProg2019.Maze.Maze)">
+ <summary>
+ Algoritmo ricorsivo di risoluzione del labirinto, usando un albero n-ario
+ </summary>
+ <param name="maze">La struttura dati del labirinto</param>
+ <returns>la struttura dati del labirinto modificata</returns>
+</member>
+<member name="M:LabProg2019.TreeMaze.findHierarchy(LabProg2019.Maze.Maze,System.Collections.Generic.Queue{LabProg2019.TreeMaze.Tree})">
+ <summary>
+ Algoritmo di ricerca in profondità di un albero n-ario, usato per generare la gerarchia padre-figlio
+ </summary>
+ <param name="maze">La struttura dati del labirinto</param>
+ <param name="queue">Una coda</param>
+ <returns>La foglia corrispondente all'uscita del labirinto</returns>
+</member>
+<member name="M:LabProg2019.TreeMaze.solveIterative(LabProg2019.Maze.Maze)">
+ <summary>
+ Algoritmo iterativo di risoluzione del labirinto basato sull'utilizzo di un albero n-ario
+ </summary>
+ <param name="maze">La struttura dati del labirinto</param>
+ <returns>la struttura dati del labirinto modificata</returns>
+</member>
+<member name="M:LabProg2019.TreeMaze.buildPath(Microsoft.FSharp.Core.FSharpOption{LabProg2019.TreeMaze.Tree},LabProg2019.Maze.Maze)">
+ <summary>
+ Modifica le celle della matrice in modo da rapprensentare la strada 
+ </summary>
+ <param name="root">La radice dell'albero</param>
+ <param name="maze">La struttura dati del labirinto</param>
+ <returns>la struttura dati del labirinto modificata</returns>
+</member>
+<member name="M:LabProg2019.TreeMaze.retrievePath(Microsoft.FSharp.Core.FSharpOption{LabProg2019.TreeMaze.Tree})">
+ <summary>
+ Ricava ricorsivamente tutte le celle padre della foglia corrispondente all'uscita del labirinto
+ </summary>
+ <param name="leaf">La foglia dell'albero</param>
+ <returns>Una lista di celle</returns>
+</member>
+<member name="M:LabProg2019.TreeMaze.getChildren(LabProg2019.TreeMaze.Tree,LabProg2019.Maze.Cell[0:, 0:])">
+ <summary>
+ Ricava tutti i figli di un nodo dell'albero
+ </summary>
+ <param name="node">Il nodo dell'albero</param>
+ <param name="maze">La matrice che identifica il labirinto</param>
+</member>
+<member name="M:LabProg2019.Actions.State.move(System.ConsoleKeyInfo,Microsoft.FSharp.Core.FSharpOption{LabProg2019.Gfx.wronly_raster},Microsoft.FSharp.Core.FSharpOption{Microsoft.FSharp.Collections.FSharpList{System.String}})">
+ <summary>
+ Esecuzione dell'azione assegnata allo stato
+ </summary>
+ <param name="k">Il tasto premuto</param>
+ <param name="r">Il write only raster adibito alla scrittura su schermo</param>
+ <param name="s">La lista di voci di menù</param>
+ <returns>Un nuovo stato, risultato della modifica di quello attuale</returns>
+</member>
+<member name="P:LabProg2019.Actions.State.text">
+ <summary>
+ Le voci di menù dello stato
+ </summary>
+ <returns>Una lista di stringhe rappresentanti le voci di menù</returns>
+</member>
+<member name="P:LabProg2019.Actions.State.size">
+ <summary>
+ La grandezza della finestra
+ </summary>
+ <returns>Una coppia di interi rappresentanti la grandezza della finestra</returns>
+</member>
+<member name="P:LabProg2019.Actions.State.player">
+ <summary>
+ Il giocatore dello stato
+ </summary>
+ <returns>Uno sprite indicante il giocatore dello stato</returns>
+</member>
+<member name="P:LabProg2019.Actions.State.name">
+ <summary>
+ Il nome dello stato
+ </summary>
+ <returns>Una stringa indicante il nome lo stato</returns>
+</member>
+<member name="P:LabProg2019.Actions.State.maze">
+ <summary>
+ La struttura dati del labirinto contenuta nello stato
+ </summary>
+ <returns>La struttura dati del labirinto dello stato</returns>
+</member>
+<member name="P:LabProg2019.Actions.State.background">
+ <summary>
+ Il background dello stato
+ </summary>
+ <returns>Uno sprite indicante il background dello stato</returns>
+</member>
+<member name="P:LabProg2019.Actions.State.active">
+ <summary>
+ La voce di menù attiva
+ </summary>
+ <returns>Un intero indicante la voce di menù attiva</returns>
+</member>
+<member name="T:LabProg2019.Actions.State">
+ <summary>
+ Unione discriminata di Game e Menu che rappresenta la struttura dati principale del gioco
+ </summary>
+ <param name="name">Il nome dello stato</param>
+ <param name="pg">Il giocatore dello stato</param>
+ <param name="bg">Il background dello stato</param>
+ <param name="move">La funzione che deve eseguire ad ogni ciclo di esecuzione</param>
+ <param name="maze">La struttura dati del labirinto</param>
+ <param name="size">La granzedda della finestra di gioco o del labirinto</param>
+ <param name="voices">Lista contenente le voci di menù</param>
+ <param name="active">Un numero indicativo della posizione del cursore nel menù</param>
+</member>
+<member name="M:LabProg2019.Actions.showSolution(LabProg2019.Actions.State,System.ConsoleKeyInfo)">
+ <summary>
+ Mostra la soluzione del labirinto attuale
+ </summary>
+ <param name="st">Lo stato attuale</param>
+ <param name="key">Il testo premuto</param>
+ <returns>Un nuovo stato, risultato della modifica di quello attuale</returns>
+</member>
+<member name="M:LabProg2019.Actions.showMenu(LabProg2019.Actions.State,System.ConsoleKeyInfo,LabProg2019.Gfx.wronly_raster,Microsoft.FSharp.Collections.FSharpList{System.String},System.Int32,System.Int32)">
+ <summary>
+ Scrive sulla console di gioco
+ </summary>
+ <param name="s">La stringa da scrivere</param>
+ <param name="index">L'indice, indicante la posizione della voce di menù</param>
+ <param name="wr">Il write only raster adibito alla scrittura su schermo</param>
+ <param name="size">La grandezza della finestra di gioco</param>
+ <returns>Un nuovo stato, risultato della modifica di quello attuale</returns>
+</member>
+<member name="M:LabProg2019.Actions.drawText(System.String,System.Int32,System.ConsoleColor,LabProg2019.Gfx.wronly_raster,System.Int32,System.Int32)">
+ <summary>
+ Scrive sulla console di gioco
+ </summary>
+ <param name="s">La stringa da scrivere</param>
+ <param name="index">L'indice, indicante la posizione della voce di menù</param>
+ <param name="wr">Il write only raster adibito alla scrittura su schermo</param>
+ <param name="size">La grandezza della finestra di gioco</param>
+</member>
+<member name="M:LabProg2019.Actions.solveMaze(LabProg2019.Actions.State,System.ConsoleKeyInfo)">
+ <summary>
+ Genera un nuovo labirinto risolto
+ </summary>
+ <param name="st">Lo stato attuale</param>
+ <param name="key">Il testo premuto</param>
+ <returns>Un nuovo stato, risultato della modifica di quello attuale</returns>
+</member>
+<member name="M:LabProg2019.Actions.generateMaze(LabProg2019.Actions.State,System.ConsoleKeyInfo)">
+ <summary>
+ Genera un nuovo labirinto
+ </summary>
+ <param name="st">Lo stato attuale</param>
+ <param name="key">Il testo premuto</param>
+ <returns>Un nuovo stato, risultato della modifica di quello attuale</returns>
+</member>
+<member name="M:LabProg2019.Actions.movePlayer(LabProg2019.Actions.State,System.ConsoleKeyInfo)">
+ <summary>
+ Sposta lo sprite in base al tasto premuto
+ </summary>
+ <param name="st">Lo stato attuale</param>
+ <param name="key">Il testo premuto</param>
+ <returns>Un nuovo stato, risultato della modifica di quello attuale</returns>
+</member>
+<member name="M:LabProg2019.Actions.check_bounds(LabProg2019.Actions.State,System.Double,System.Double)">
+ <summary>
+ Controlla se il movimento eseguito è consentito
+ </summary>
+ <param name="st">Lo stato attuale</param>
+ <param name="dx">Lo spostamento orizzontale</param>
+ <param name="dy">Lo spostamento verticale</param>
+ <returns>Una coppia di float indicante il movimento da eseguire</returns>
+</member>
+<member name="M:LabProg2019.Scene.SceneManager.setSize(LabProg2019.Actions.State,System.Int32,Microsoft.FSharp.Core.FSharpOption{System.Int32})">
+ <summary>
+ Cambia le dimensioni del labirinto 
+ </summary>
+ <param name="s">Lo stato attuale</param>
+ <param name="size">La nuova grandezza</param>
+ <param name="pos">La nuova posizione del cursore nel menù</param>
+ <returns>Un nuovo stato con la grandezza modificata</returns>
+</member>
+<member name="M:LabProg2019.Scene.SceneManager.setGameSize(System.Int32,System.Int32)">
+ <summary>
+ Imposta una nuova grandezza a tutti gli stati del gioco
+ </summary>
+ <param name="size">La nuova grandezza</param>
+ <param name="pos">La nuova posizione del cursore nel menù</param>
+</member>
+<member name="M:LabProg2019.Scene.SceneManager.setCurrentScene(System.String)">
+ <summary>
+ Imposta lo stato corrente
+ </summary>
+ <param name="name">Il nome dello stato</param>
+</member>
+<member name="M:LabProg2019.Scene.SceneManager.resetState(LabProg2019.Actions.State)">
+ <summary>
+ Esegue il reset di uno stato
+ </summary>
+ <param name="s">Lo stato attuale</param>
+ <returns>Un nuovo stato default</returns>
+</member>
+<member name="M:LabProg2019.Scene.SceneManager.resetGame">
+ <summary>
+ Esegue il reset di tutti gli stati del gioco
+ </summary>
+</member>
+<member name="M:LabProg2019.Scene.SceneManager.isPresent(System.String)">
+ <summary>
+ Controlla l'esistenza di uno stato all'interno della lista degli stati di gioco
+ </summary>
+ <param name="name">Il nome dello stato</param>
+ <returns>Un boolean rappresentante l'esito della ricerca</returns>
+</member>
+<member name="M:LabProg2019.Scene.SceneManager.getScene(System.String)">
+ <summary>
+ Cerca uno stato all'interno della lista degli stati di gioco
+ </summary>
+ <param name="name">Il nome dello stato</param>
+ <returns>Una lista contenente lo stato cercato</returns>
+</member>
+<member name="M:LabProg2019.Scene.SceneManager.execute(LabProg2019.Engine.engine,Microsoft.FSharp.Core.FSharpOption{System.ConsoleKeyInfo},LabProg2019.Gfx.wronly_raster)">
+ <summary>
+ Controlla il testo premuto ed esegue la funzione adeguata
+ </summary>
+ <param name="engine">Il motore di gioco</param>
+ <param name="key">Il tasto premuto</param>
+ <param name="wr">Il write only raster adibito alla scrittura a schermo</param>
+</member>
+<member name="M:LabProg2019.Scene.SceneManager.deleteScene(System.String)">
+ <summary>
+ Rimuove uno stato dall'interno della lista degli stati di gioco
+ </summary>
+ <param name="name">Il nome dello stato</param>
+ <returns>Una lista contenente gli stati del gioco escluso quello rimosso</returns>
+</member>
+<member name="M:LabProg2019.Scene.SceneManager.changeScene``1(System.String,Microsoft.FSharp.Core.FSharpOption{``0})">
+ <summary>
+ Cambia la scena attuale
+ </summary>
+ <param name="name">Il nome dello stato</param>
+</member>
+<member name="M:LabProg2019.Scene.SceneManager.addScene(System.String,Microsoft.FSharp.Core.FSharpFunc{LabProg2019.Actions.State,Microsoft.FSharp.Core.FSharpFunc{System.ConsoleKeyInfo,LabProg2019.Actions.State}},System.Boolean,Microsoft.FSharp.Core.FSharpOption{LabProg2019.Gfx.sprite},Microsoft.FSharp.Core.FSharpOption{LabProg2019.Gfx.sprite},Microsoft.FSharp.Core.FSharpOption{LabProg2019.Maze.Maze},Microsoft.FSharp.Core.FSharpOption{Microsoft.FSharp.Collections.FSharpList{System.String}},Microsoft.FSharp.Core.FSharpOption{System.Int32},Microsoft.FSharp.Core.FSharpOption{Microsoft.FSharp.Core.FSharpFunc{LabProg2019.Actions.State,Microsoft.FSharp.Core.FSharpFunc{System.ConsoleKeyInfo,Microsoft.FSharp.Core.FSharpFunc{LabProg2019.Gfx.wronly_raster,Microsoft.FSharp.Core.FSharpFunc{Microsoft.FSharp.Collections.FSharpList{System.String},Microsoft.FSharp.Core.FSharpFunc{System.Tuple{System.Int32,System.Int32},LabProg2019.Actions.State}}}}}},Microsoft.FSharp.Core.FSharpOption{System.Tuple{System.Int32,System.Int32}})">
+ <summary>
+ Aggiunge un nuovo stato alla lista degli stati di gioco
+ </summary>
+ <param name="name">Il nome dello stato</param>
+ <param name="move">La funzione da eseguire ad ogni ciclo di esecuzione (per Game)</param>
+ <param name="game">Valore indicante se lo stato è Game o Menu</param>
+ <param name="bg">Il background dello stato</param>
+ <param name="pg">Il giocatore dello stato</param>
+ <param name="name">Il nome dello stato</param>
+ <param name="maze">La struttura dati rapprensentante il labirinto</param>
+ <param name="voices">Le voci di menù</param>
+ <param name="active">La posizione del cursore nel menù</param>
+ <param name="menu">La funzione da eseguire ad ogni ciclo di esecuzione (per Menu)</param>
+ <param name="size">La grandezza della finestra o del labirinto</param>
+</member>
+<member name="T:LabProg2019.Scene.SceneManager">
+ <summary>
+ Tipo SceneManager
+ </summary>
+ <param name="_gameStates">Gli stati supportati dal gioco</param>
+ <param name="_engine">Il motore di gioco</param>
+</member>
 </members>
 </doc>
