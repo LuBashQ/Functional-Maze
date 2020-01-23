@@ -157,9 +157,15 @@ type SceneManager (_gameStates: State list, _engine: engine) =
     /// <param name="key">Il tasto premuto</param>
     /// <param name="wr">Il write only raster adibito alla scrittura a schermo</param>
     member this.execute (engine: engine) (key:ConsoleKeyInfo option) (wr: wronly_raster) = 
+        
         if this.currentScene.IsNone then 
             this.changeScene ("menu",wr)
         else
+
+            match this.currentScene.Value with
+            | Game(_,_,_,_,_,_,_) -> Console.Beep(500,10)
+            | _ -> Console.Beep(800,10)
+
             match key.Value.Key with
                 | ConsoleKey.R -> match this.currentScene.Value with
                                     | Game(_,p,_,_,m,s,v) -> 
