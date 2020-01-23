@@ -84,9 +84,7 @@ type Maze (width, height) =
         for x = 0 to (width-1) do
             for y = 0 to (height-1) do
                 if this.maze.[x,y].isVisited then
-                    if this.maze.[x,y].isExit then 
-                        this.pixelMap.SetValue (pixel.create('\219',Color.Cyan),x,y)
-                    else if this.maze.[x,y].isPath then 
+                    if this.maze.[x,y].isPath then 
                         this.pixelMap.SetValue (pixel.create('\219',Color.DarkMagenta),x,y)
                 else 
                     this.pixelMap.SetValue (pixel.create('\219',Color.White),x,y)
