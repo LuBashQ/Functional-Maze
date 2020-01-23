@@ -147,7 +147,7 @@ let check_bounds (st:State) (dx: float, dy: float)=
 /// <param name="size">La grandezza della finestra di gioco</param>
 let drawMenuText (s: string) (index: int) (color:ConsoleColor) (wr: wronly_raster) (size: int*int) : unit =
     let x,y = size
-    wr.draw_text((sprintf "%s\n\n" s),x/2-2,(y/2 + index),color)
+    wr.draw_text((sprintf "%s\n\n" s),x/2-3,(y/2 + index),color)
 
 
 let drawText (s: string) (index: int) (color:ConsoleColor) (wr: wronly_raster) (size: int*int) (pos: int*int) : unit =

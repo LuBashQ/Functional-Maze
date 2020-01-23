@@ -185,7 +185,10 @@ type SceneManager (_gameStates: State list, _engine: engine) =
                                                 this.setGameVisibility (int option + 1) a
                                                 this.changeScene ("visibility",wr)
                                             | _ -> 
-                                                this.changeScene (option.ToLower(),wr)
+                                                let op = option.ToLower()
+                                                if op = "quit" then engine.quit()
+                                                else
+                                                    this.changeScene (op,wr)
                                     | _ -> ()
                 | _ -> 
                         match this.currentScene.Value with
