@@ -107,7 +107,7 @@
 <member name="F:LabProg2019.Maze.Maze.yAxisPosition">
 <summary>Ricava una colonna disponibile per la creazione dell'uscita</summary>
 </member>
-<member name="M:LabProg2019.Maze.Maze.toSprite">
+<member name="M:LabProg2019.Maze.Maze.toSprite(System.Int32,Microsoft.FSharp.Core.FSharpOption{System.Int32})">
  <summary>
  Converte un array di pixel in uno sprite 
  </summary>
@@ -417,7 +417,7 @@
  </summary>
  <param name="name">Il nome dello stato</param>
 </member>
-<member name="M:LabProg2019.Scene.SceneManager.addScene(System.String,Microsoft.FSharp.Core.FSharpFunc{LabProg2019.Actions.State,Microsoft.FSharp.Core.FSharpFunc{System.ConsoleKeyInfo,LabProg2019.Actions.State}},System.Boolean,Microsoft.FSharp.Core.FSharpOption{LabProg2019.Gfx.sprite},Microsoft.FSharp.Core.FSharpOption{LabProg2019.Gfx.sprite},Microsoft.FSharp.Core.FSharpOption{LabProg2019.Maze.Maze},Microsoft.FSharp.Core.FSharpOption{Microsoft.FSharp.Collections.FSharpList{System.String}},Microsoft.FSharp.Core.FSharpOption{System.Int32},Microsoft.FSharp.Core.FSharpOption{Microsoft.FSharp.Core.FSharpFunc{LabProg2019.Actions.State,Microsoft.FSharp.Core.FSharpFunc{System.ConsoleKeyInfo,Microsoft.FSharp.Core.FSharpFunc{LabProg2019.Gfx.wronly_raster,Microsoft.FSharp.Core.FSharpFunc{Microsoft.FSharp.Collections.FSharpList{System.String},Microsoft.FSharp.Core.FSharpFunc{System.Tuple{System.Int32,System.Int32},LabProg2019.Actions.State}}}}}},Microsoft.FSharp.Core.FSharpOption{System.Tuple{System.Int32,System.Int32}})">
+<member name="M:LabProg2019.Scene.SceneManager.addScene(System.String,Microsoft.FSharp.Core.FSharpFunc{LabProg2019.Actions.State,Microsoft.FSharp.Core.FSharpFunc{System.ConsoleKeyInfo,LabProg2019.Actions.State}},System.Boolean,Microsoft.FSharp.Core.FSharpOption{LabProg2019.Gfx.sprite},Microsoft.FSharp.Core.FSharpOption{LabProg2019.Gfx.sprite},Microsoft.FSharp.Core.FSharpOption{LabProg2019.Maze.Maze},Microsoft.FSharp.Core.FSharpOption{Microsoft.FSharp.Collections.FSharpList{System.String}},Microsoft.FSharp.Core.FSharpOption{System.Int32},Microsoft.FSharp.Core.FSharpOption{Microsoft.FSharp.Core.FSharpFunc{LabProg2019.Actions.State,Microsoft.FSharp.Core.FSharpFunc{System.ConsoleKeyInfo,Microsoft.FSharp.Core.FSharpFunc{LabProg2019.Gfx.wronly_raster,Microsoft.FSharp.Core.FSharpFunc{Microsoft.FSharp.Collections.FSharpList{System.String},Microsoft.FSharp.Core.FSharpFunc{System.Tuple{System.Int32,System.Int32},LabProg2019.Actions.State}}}}}},Microsoft.FSharp.Core.FSharpOption{System.Tuple{System.Int32,System.Int32}},Microsoft.FSharp.Core.FSharpOption{System.Int32})">
  <summary>
  Aggiunge un nuovo stato alla lista degli stati di gioco
  </summary>

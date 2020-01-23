@@ -20,9 +20,14 @@ exception PropertyNotImplementedException
 /// <param name="voices">Lista contenente le voci di menù</param>
 /// <param name="active">Un numero indicativo della posizione del cursore nel menù</param>
 type State =
-    | Game of name:string * pg:sprite option * bg:sprite option * move:(State -> ConsoleKeyInfo -> State) * maze: Maze option * size: (int * int)
-    | Menu of name:string * bg:sprite option * move:(State -> ConsoleKeyInfo -> wronly_raster -> string list -> (int*int) -> State) * voices:string list * active: int * size: (int*int)
-    | Text of name:string * bg:sprite option * move:(State -> ConsoleKeyInfo -> wronly_raster -> string list -> (int * int) -> (int*int) ->State) * voices: string list * size: (int*int) * pos: (int*int) * active: int
+    | Game of name:string * pg:sprite option * bg:sprite option * 
+    move:(State -> ConsoleKeyInfo -> State) * maze: Maze option * size: (int * int) * visibility: int
+    | Menu of name:string * bg:sprite option * 
+    move:(State -> ConsoleKeyInfo -> wronly_raster -> string list -> (int*int) -> State) * 
+    voices:string list * active: int * size: (int*int)
+    | Text of name:string * bg:sprite option * 
+    move:(State -> ConsoleKeyInfo -> wronly_raster -> string list -> (int * int) -> (int*int) ->State) * 
+    voices: string list * size: (int*int) * pos: (int*int) * active: int
     /// <summary>
     /// Il nome dello stato
     /// </summary>
@@ -31,6 +36,11 @@ type State =
         match this with
         | Game(name = n) | Menu(name = n) | Text(name = n) -> n.ToLower()
     
+    member this.visibility = 
+        match this with
+        | Game(visibility = v) -> v
+        | _ -> raise PropertyNotImplementedException
+
     /// <summary>
     /// Il background dello stato
     /// </summary>
@@ -170,15 +180,39 @@ let rec showText (st: State) (key: ConsoleKeyInfo)  (wr: wronly_raster) (ls: str
 let movePlayer (st: State) (key: ConsoleKeyInfo): State =
     let dx,dy =
         match key.Key with
-        | ConsoleKey.W | ConsoleKey.UpArrow -> 0.,-0.5
-        | ConsoleKey.S | ConsoleKey.DownArrow -> 0.,0.5
-        | ConsoleKey.A | ConsoleKey.LeftArrow -> -0.5,0.
-        | ConsoleKey.D | ConsoleKey.RightArrow -> 0.5,0.
+        | ConsoleKey.W | ConsoleKey.UpArrow -> 0.,-1.
+        | ConsoleKey.S | ConsoleKey.DownArrow -> 0.,1.
+        | ConsoleKey.A | ConsoleKey.LeftArrow -> -1.,0.
+        | ConsoleKey.D | ConsoleKey.RightArrow -> 1.,0.
         | _ -> 0.,0.
 
     let x,y = check_bounds st (dx,dy)
     st.player.Value.move_by (x,y)
     st
+
+let drawSubRegion (st: State) =
+    let maze = st.maze
+    let background = maze.toSprite (1,st.visibility)
+    match st with
+    | Game(n,pg,bg,mv,maze,size,v) -> 
+        Game(n,pg,Some background,mv,maze,size,v)
+    | _ -> failwith ""
+
+let rec hardModeMove (st: State) (key: ConsoleKeyInfo): State =
+    let dx,dy =
+        match key.Key with
+        | ConsoleKey.W | ConsoleKey.UpArrow -> 0.,-1.
+        | ConsoleKey.S | ConsoleKey.DownArrow -> 0.,1.
+        | ConsoleKey.A | ConsoleKey.LeftArrow -> -1.,0.
+        | ConsoleKey.D | ConsoleKey.RightArrow -> 1.,0.
+        | _ -> 0.,0.
+
+    let x,y = check_bounds st (dx,dy)
+    st.player.Value.move_by (x,y)
+    let px,py = int (ceil st.player.Value.x), int (ceil st.player.Value.y)
+    st.maze.player <- Cell(px,py,st.maze.width,st.maze.height)
+    drawSubRegion st
+
 
 /// <summary>
 /// Genera un nuovo labirinto
@@ -190,9 +224,22 @@ let generateMaze (st:State) (key: ConsoleKeyInfo) : State =
     let w,h = st.size
     let maze = new Maze(w,h)
     maze.generate ()
-    let background = Some (maze.toSprite())
-    let newState = Game("play",st.player,background,movePlayer,Some maze,(w,h))
+    let player = Cell(int st.player.Value.x, int st.player.Value.y,maze.width,maze.height)
+    maze.player <- player
+    let background = maze.toSprite 0
+    let newState = Game("play",st.player,Some background,movePlayer,Some maze,(w,h),st.visibility)
     movePlayer newState key
+
+
+let generateHardcoreMaze (st:State) (key: ConsoleKeyInfo) : State = 
+    let w,h = st.size
+    let maze = new Maze(w,h)
+    maze.generate ()
+    let player = Cell(int st.player.Value.x, int st.player.Value.y,maze.width,maze.height)
+    maze.player <- player
+    let background = maze.toSprite (1,st.visibility)
+    let newState = Game("play",st.player,Some background,hardModeMove,Some maze,(w,h),st.visibility)
+    hardModeMove newState key
 
 /// <summary>
 /// Genera un nuovo labirinto risolto
@@ -205,8 +252,8 @@ let solveMaze (st: State) (key: ConsoleKeyInfo) : State =
     let maze = new Maze(w,h)
     maze.generate ()
     solveRecursive maze |> ignore
-    let background = Some (maze.toSprite())
-    let newState = Game(st.name,st.player,background,movePlayer,Some maze,st.size)
+    let background = Some (maze.toSprite(0))
+    let newState = Game(st.name,st.player,background,movePlayer,Some maze,st.size,st.visibility)
     movePlayer newState key
 
 
@@ -246,6 +293,7 @@ let rec showMenu (st: State) (key: ConsoleKeyInfo)  (wr: wronly_raster) (ls: str
 /// <returns>Un nuovo stato, risultato della modifica di quello attuale</returns>
 let showSolution (st: State) (key: ConsoleKeyInfo) : State =
     let solved = solveRecursive st.maze
-    let background = Some (solved.toSprite())
-    let newState = Game(st.name,st.player,background,movePlayer,Some solved,st.size)
+    let background = Some (solved.toSprite(0))
+    let newState = Game(st.name,st.player,background,movePlayer,Some solved,st.size,st.visibility)
     movePlayer newState key
+

@@ -26,7 +26,7 @@ type SceneManager (_gameStates: State list, _engine: engine) =
     member private this.resetState s =
         let player = sprite(image.rectangle(1,1,pixel.filled Color.Red),1,1,1)
         match s with
-        | Game(n,_,_,mv,_,size) -> Game(n,Some player,None,mv,None,size)
+        | Game(n,_,_,mv,_,size,v) -> Game(n,Some player,None,mv,None,size,v)
         | _ -> s
 
     /// <summary>
@@ -39,11 +39,22 @@ type SceneManager (_gameStates: State list, _engine: engine) =
     member private this.setSize (s,size,?pos) =
         let player = sprite(image.rectangle(1,1,pixel.filled Color.Red),1,1,1)
         match s with
-        | Game(n,_,_,mv,_,_) -> Game(n,Some player,None,mv,None,(size,size))
+        | Game(n,_,_,mv,_,_,v) -> Game(n,Some player,None,mv,None,(size,size),v)
         | Menu(n,bg,mv,ls,a,size) -> Menu(n,bg,mv,ls,pos.Value,size)
         | _ -> s
     
-    /// <summary>
+   
+    member private this.setVisiblity (s,visibility,?pos) =
+        let player = sprite(image.rectangle(1,1,pixel.filled Color.Red),1,1,1)
+        match s with
+        | Game(n,_,_,mv,_,s,v) -> Game(n,Some player,None,mv,None,s,visibility)
+        | Menu(n,bg,mv,ls,a,size) -> Menu(n,bg,mv,ls,pos.Value,size)
+        | _ -> s
+
+    member private this.setGameVisibility v pos =
+        this.gameStates <- List.map(fun (s:State) -> this.setVisiblity (s,v,pos)) this.gameStates 
+   
+   /// <summary>
     /// Imposta una nuova grandezza a tutti gli stati del gioco
     /// </summary>
     /// <param name="size">La nuova grandezza</param>
@@ -105,11 +116,11 @@ type SceneManager (_gameStates: State list, _engine: engine) =
     /// <param name="size">La grandezza della finestra o del labirinto</param>
     member private this.addScene (n:string, move: (State->ConsoleKeyInfo->State), 
         game: bool, ?bg:sprite, ?pg:sprite, ?maze: Maze, ?voices: string list, ?active: int, 
-        ?menu:(State->ConsoleKeyInfo->wronly_raster->string list->(int*int)->State), ?size: int*int) : unit =
+        ?menu:(State->ConsoleKeyInfo->wronly_raster->string list->(int*int)->State), ?size: int*int, ?visibility: int) : unit =
         
         let state = 
             match game with
-            | true -> Game(n,pg,bg,move,maze,size.Value)
+            | true -> Game(n,pg,bg,move,maze,size.Value,visibility.Value)
             | _ -> Menu(n,bg,menu.Value,voices.Value,active.Value,size.Value)
 
         this.gameStates <- List.append this.gameStates [state]
@@ -146,15 +157,15 @@ type SceneManager (_gameStates: State list, _engine: engine) =
     /// <param name="key">Il tasto premuto</param>
     /// <param name="wr">Il write only raster adibito alla scrittura a schermo</param>
     member this.execute (engine: engine) (key:ConsoleKeyInfo option) (wr: wronly_raster) = 
-        if this.currentScene.IsNone || key.IsNone then 
+        if this.currentScene.IsNone then 
             this.changeScene ("menu",wr)
         else
             match key.Value.Key with
                 | ConsoleKey.R -> match this.currentScene.Value with
-                                    | Game(_,p,_,_,m,s) -> 
+                                    | Game(_,p,_,_,m,s,v) -> 
                                         if this.isPresent "solve" then ()
                                         else
-                                            this.addScene ("solve",showSolution,true,pg=p.Value,maze=m.Value,size=s)
+                                            this.addScene ("solve",showSolution,true,pg=p.Value,maze=m.Value,size=s,visibility=v)
                                             this.changeScene ("solve",wr)
                                             this.gameStates <- this.deleteScene "solve"
                                     | Menu(_,_,_,t,_,_) -> this.currentScene <- Some (this.currentScene.Value.move (key.Value,wr,t))
@@ -165,30 +176,34 @@ type SceneManager (_gameStates: State list, _engine: engine) =
                     this.changeScene ("menu",wr)
                 | ConsoleKey.F -> match this.currentScene.Value with
                                     | Menu(active = a) | Text(active = a) -> 
-                                        if this.currentScene.Value.name = "size" then
-                                            if  not (a = this.currentScene.Value.text.Length - 1) then
-                                                let size = int (List.item a this.currentScene.Value.text) + 1
-                                                this.setGameSize size a
+                                            let option = List.item a this.currentScene.Value.text
+                                            match this.currentScene.Value.name with
+                                            | "size" -> 
+                                                this.setGameSize (int option + 1) a
                                                 this.changeScene ("size",wr)
-                                            else
-                                                let name = (List.item a this.currentScene.Value.text).ToLower ()
-                                                this.changeScene (name,wr)
-                                        else
-                                            let name = (List.item a this.currentScene.Value.text).ToLower ()
-                                            //Continue non definito ancora, serve per prevenire il reset del gioco
-                                            if not (name = "continue") then this.resetGame ()
-                                            this.changeScene (name,wr)
+                                            | "visibility" -> 
+                                                this.setGameVisibility (int option + 1) a
+                                                this.changeScene ("visibility",wr)
+                                            | _ -> 
+                                                this.changeScene (option.ToLower(),wr)
                                     | _ -> ()
                 | _ -> 
                         match this.currentScene.Value with
-                        | Game(_,_,_,_,_,_) -> 
+                        | Game(_,_,_,_,_,_,_) -> 
                             this.currentScene <- Some (this.currentScene.Value.move key.Value)
                             let p = this.currentScene.Value.player
                             let m = this.currentScene.Value.maze
                             if int p.Value.x = m.finish.y && int p.Value.y = m.finish.x then
-                                this.changeScene("vittoria",wr)
+                                this.changeScene("win",wr)
                             else
-                                this.currentScene <- Some (this.currentScene.Value.move key.Value)
+                                this.gameStates <- this.deleteScene this.currentScene.Value.name
+                                let scene = this.currentScene.Value
+                                match scene with
+                                | Game(n,pg,bg,mv,maze,size,v) ->
+                                    this.resetGame ()
+                                    this.addScene (n,mv,true,bg.Value,pg.Value,maze.Value,size=size,visibility=v)
+                                    this.changeScene (n,wr)
+                                | _ -> ()
                         | Menu(_,_,_,t,_,_) -> 
                             this.currentScene <- Some (this.currentScene.Value.move (key.Value,wr,t))
                         | Text(_,_,_,vs,_,_,_) -> 

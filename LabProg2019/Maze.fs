@@ -74,6 +74,7 @@ type Maze (width, height) =
     member val pixelMap = Array2D.init width height (fun x y -> pixel.empty)
     member this.start = this.maze.[1,1]
     member this.finish = this.maze.[width - 1,yAxisPosition]
+    member val player = Cell(1,1,width,height) with get,set
 
 
     /// <summary>
@@ -91,6 +92,55 @@ type Maze (width, height) =
         
         toArray this.pixelMap
     
+
+    member this.isInArea (diameter:int) =
+        let radius = diameter/2
+        let x,y = this.player.x,this.player.y
+        
+        let area = [
+            for i = -radius to radius do
+                for j = -radius to radius do
+                    if checkMatrixBounds(y+j,x+i,this.width,this.height) then
+                        yield this.maze.[y+j,x+i]
+        ]
+
+        let grayArea = [
+            for i = -radius-1 to radius+1 do
+                for j = -radius-1 to radius+1 do
+                    if checkMatrixBounds(y+j,x+i,this.width,this.height) then
+                        yield this.maze.[y+j,x+i]
+        ]
+
+        let rec aux ls acc =
+            match ls with
+            | [] -> acc
+            | x::xs -> aux xs (List.filter ((<>) x) acc)
+
+        area, aux area grayArea
+        
+
+    member this.convertAreaToPixel (diameter:int) =
+        let area,grayArea = this.isInArea diameter
+        for x = 0 to (width-1) do
+            for y = 0 to (height-1) do
+                if List.exists ((=) this.maze.[x,y]) grayArea then
+                    if this.maze.[x,y].isVisited then
+                        if this.maze.[x,y].isPath then 
+                            this.pixelMap.SetValue (pixel.create('\219',Color.DarkMagenta),x,y)
+                    else 
+                        this.pixelMap.SetValue (pixel.create('\219',Color.DarkGray),x,y)
+                else if List.exists ((=) this.maze.[x,y]) area then
+                    if this.maze.[x,y].isVisited then
+                        if this.maze.[x,y].isPath then 
+                            this.pixelMap.SetValue (pixel.create('\219',Color.DarkMagenta),x,y)
+                    else 
+                        this.pixelMap.SetValue (pixel.create('\219',Color.White),x,y)
+                else
+                        this.pixelMap.SetValue (pixel.create('\219',Color.Black),x,y)
+                
+                
+        
+        toArray this.pixelMap
 
     /// <summary>
     /// Implementazione dell'algoritmo "recursive backtracker", 
@@ -130,8 +180,11 @@ type Maze (width, height) =
     /// </summary>
     /// <returns>Uno sprite contenente il labirinto</returns>
     /// <seealso cref="this.convertToPixel"/>
-    member this.toSprite () =
-        sprite(image(width,height,this.convertToPixel ()),0,0,0)
+    member this.toSprite (t:int,?diameter:int) =
+        match t with
+        | 0 -> sprite(image(width,height,this.convertToPixel ()),0,0,0)
+        | _ -> sprite(image(width,height,this.convertAreaToPixel diameter.Value),0,0,0)
+
     
     /// <summary>
     /// Genera e imposta entrata e uscita del labirinto
