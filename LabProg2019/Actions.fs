@@ -6,6 +6,8 @@ open Maze
 open TreeMaze
 
 
+exception PropertyNotImplementedException
+
 /// <summary>
 /// Unione discriminata di Game e Menu che rappresenta la struttura dati principale del gioco
 /// </summary>
@@ -20,14 +22,14 @@ open TreeMaze
 type State =
     | Game of name:string * pg:sprite option * bg:sprite option * move:(State -> ConsoleKeyInfo -> State) * maze: Maze option * size: (int * int)
     | Menu of name:string * bg:sprite option * move:(State -> ConsoleKeyInfo -> wronly_raster -> string list -> (int*int) -> State) * voices:string list * active: int * size: (int*int)
-
+    | Text of name:string * bg:sprite option * move:(State -> ConsoleKeyInfo -> wronly_raster -> string list -> (int * int) -> (int*int) ->State) * voices: string list * size: (int*int) * pos: (int*int) * active: int
     /// <summary>
     /// Il nome dello stato
     /// </summary>
     /// <returns>Una stringa indicante il nome lo stato</returns>
     member this.name =
         match this with
-        | Game(name = n) | Menu(name = n) -> n.ToLower()
+        | Game(name = n) | Menu(name = n) | Text(name = n) -> n.ToLower()
     
     /// <summary>
     /// Il background dello stato
@@ -37,15 +39,16 @@ type State =
         match this with
         | Game(bg = n) -> n.Value
         | Menu(bg = n) -> n.Value
-
+        | Text(bg = n) -> n.Value
+        
     /// <summary>
     /// La voce di menù attiva
     /// </summary>
     /// <returns>Un intero indicante la voce di menù attiva</returns>
     member this.active =
         match this with
-        | Menu(active = a) -> a
-        | _ -> -1
+        | Menu(active = a) | Text(active = a) -> a
+        | _ -> raise PropertyNotImplementedException
     
     /// <summary>
     /// Il giocatore dello stato
@@ -54,7 +57,7 @@ type State =
     member this.player =
         match this with
         | Game(pg = p) -> p
-        | _ -> failwith "Player non definito"
+        | _ -> raise PropertyNotImplementedException
 
     /// <summary>
     /// La struttura dati del labirinto contenuta nello stato
@@ -63,7 +66,7 @@ type State =
     member this.maze =
         match this with
         | Game(maze = m) -> m.Value
-        | _ -> failwith "Maze non definito"
+        | _ -> raise PropertyNotImplementedException
 
     /// <summary>
     /// Le voci di menù dello stato
@@ -71,8 +74,8 @@ type State =
     /// <returns>Una lista di stringhe rappresentanti le voci di menù</returns>
     member this.text =
         match this with
-        | Menu(voices = t) -> t
-        | _ -> []
+        | Menu(voices = t) | Text(voices = t) -> t
+        | _ -> raise PropertyNotImplementedException
 
     /// <summary>
     /// La grandezza della finestra
@@ -82,6 +85,16 @@ type State =
         match this with
         | Game(size = (x,y)) -> x,y
         | Menu(size = (x,y)) -> x,y
+        | Text(size = (x,y)) -> x,y
+
+    /// <summary>
+    /// La posizione del testo
+    /// </summary>
+    /// <returns>Una coppia di interi rappresentanti la posizione del testo/returns>
+    member this.position =
+        match this with
+        | Text(pos = (x,y)) -> x,y
+        | _ -> raise PropertyNotImplementedException
 
     /// <summary>
     /// Esecuzione dell'azione assegnata allo stato
@@ -94,7 +107,7 @@ type State =
         match this with
         | Game(move = n) -> n this k
         | Menu(move = n;size = s) -> n this k r.Value this.text s
-
+        | Text(move= n;size = s; pos = p) -> n this k r.Value this.text s p
 
 
 /// <summary>
@@ -116,6 +129,39 @@ let check_bounds (st:State) (dx: float, dy: float)=
         0.,0.
 
 /// <summary>
+/// Scrive sulla console di gioco
+/// </summary>
+/// <param name="s">La stringa da scrivere</param>
+/// <param name="index">L'indice, indicante la posizione della voce di menù</param>
+/// <param name="wr">Il write only raster adibito alla scrittura su schermo</param>
+/// <param name="size">La grandezza della finestra di gioco</param>
+let drawMenuText (s: string) (index: int) (color:ConsoleColor) (wr: wronly_raster) (size: int*int) : unit =
+    let x,y = size
+    wr.draw_text((sprintf "%s\n\n" s),x/2-2,(y/2 + index),color)
+
+
+let drawText (s: string) (index: int) (color:ConsoleColor) (wr: wronly_raster) (size: int*int) (pos: int*int) : unit =
+    let x,y = pos
+    wr.draw_text((sprintf "%s\n\n" s),x,y,color)
+
+
+let rec showText (st: State) (key: ConsoleKeyInfo)  (wr: wronly_raster) (ls: string list) (size: int*int) (pos: int*int) : State =
+    let idx = ls.Length - 1
+    let rec aux ls i idx pos=
+        match ls with
+        | [] -> ()
+        | s::xs -> 
+            let x,y = pos
+            if i = idx then 
+                drawMenuText s i ConsoleColor.Cyan wr size
+            else
+                drawText s i ConsoleColor.White wr size pos
+                aux xs (i+1) idx (x,y+2)
+
+    aux ls 0 idx st.position
+    Text(st.name,None,showText,st.text,st.size,st.position,idx)
+
+/// <summary>
 /// Sposta lo sprite in base al tasto premuto
 /// </summary>
 /// <param name="st">Lo stato attuale</param>
@@ -124,10 +170,10 @@ let check_bounds (st:State) (dx: float, dy: float)=
 let movePlayer (st: State) (key: ConsoleKeyInfo): State =
     let dx,dy =
         match key.Key with
-        | ConsoleKey.W | ConsoleKey.UpArrow -> 0.,-1.
-        | ConsoleKey.S | ConsoleKey.DownArrow -> 0.,1.
-        | ConsoleKey.A | ConsoleKey.LeftArrow -> -1.,0.
-        | ConsoleKey.D | ConsoleKey.RightArrow -> 1.,0.
+        | ConsoleKey.W | ConsoleKey.UpArrow -> 0.,-0.5
+        | ConsoleKey.S | ConsoleKey.DownArrow -> 0.,0.5
+        | ConsoleKey.A | ConsoleKey.LeftArrow -> -0.5,0.
+        | ConsoleKey.D | ConsoleKey.RightArrow -> 0.5,0.
         | _ -> 0.,0.
 
     let x,y = check_bounds st (dx,dy)
@@ -148,7 +194,6 @@ let generateMaze (st:State) (key: ConsoleKeyInfo) : State =
     let newState = Game("play",st.player,background,movePlayer,Some maze,(w,h))
     movePlayer newState key
 
-
 /// <summary>
 /// Genera un nuovo labirinto risolto
 /// </summary>
@@ -163,17 +208,6 @@ let solveMaze (st: State) (key: ConsoleKeyInfo) : State =
     let background = Some (maze.toSprite())
     let newState = Game(st.name,st.player,background,movePlayer,Some maze,st.size)
     movePlayer newState key
-
-/// <summary>
-/// Scrive sulla console di gioco
-/// </summary>
-/// <param name="s">La stringa da scrivere</param>
-/// <param name="index">L'indice, indicante la posizione della voce di menù</param>
-/// <param name="wr">Il write only raster adibito alla scrittura su schermo</param>
-/// <param name="size">La grandezza della finestra di gioco</param>
-let drawText (s: string) (index: int) (color:ConsoleColor) (wr: wronly_raster) (size: int*int)  : unit =
-    let x,y = size
-    wr.draw_text((sprintf "%s\n\n" s),x/2-2,(y/2 + index),color)
 
 
 /// <summary>
@@ -196,9 +230,9 @@ let rec showMenu (st: State) (key: ConsoleKeyInfo)  (wr: wronly_raster) (ls: str
         match ls with
         | [] -> ()
         | x::xs -> if i = idx then 
-                    drawText x i ConsoleColor.Cyan wr size
+                    drawMenuText x i ConsoleColor.Cyan wr size
                    else
-                    drawText x i ConsoleColor.White wr size
+                    drawMenuText x i ConsoleColor.White wr size
                    aux xs (i+1) idx
 
     aux ls 0 idx

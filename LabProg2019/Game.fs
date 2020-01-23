@@ -16,11 +16,13 @@ let main () =
     // Generazione degli stati supportati dal gioco
     let maze = Game("play",Some player,None,generateMaze,None,(W,H))
     let solved = Game("solved",Some player,None,solveMaze,None,(W,H))
-    let menu = Menu("menu",None,showMenu,["PLAY";"SOLVED";"OPTIONS"],0,(W,H))
+    let menu = Menu("menu",None,showMenu,["PLAY";"SOLVED";"OPTIONS";"HELP"],0,(W,H))
     let options = Menu("options",None,showMenu,["SIZE";"MENU"],0,(W,H))     
-    let size = Menu("size",None,showMenu,["20";"30";"40";"50";"OPTIONS"],3,(W,H))  
+    let size = Menu("size",None,showMenu,["4";"10";"20";"30";"40";"50";"OPTIONS"],3,(W,H))  
+    let help = Text("help",None,showText,["W-A-S-D or ARROWS to move";"F to execute";"R to resolve maze"; "Q to quit";"MENU"],(W,H),(W/4+2,15),0)
+    let vittoria = Text("vittoria",None,showText,["HAI VINTO";"MENU"],(W,H),(W/4+2,15),0)
 
-    let sceneManager = SceneManager([menu;maze;solved;options;size],engine)
+    let sceneManager = SceneManager([menu;maze;solved;options;size;help;vittoria],engine)
 
     // Esecuzione del gioco
     engine.loop_on_key <| sceneManager.execute engine

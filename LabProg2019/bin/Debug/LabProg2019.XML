@@ -239,6 +239,12 @@
  </summary>
  <returns>Una coppia di interi rappresentanti la grandezza della finestra</returns>
 </member>
+<member name="P:LabProg2019.Actions.State.position">
+ <summary>
+ La posizione del testo
+ </summary>
+ <returns>Una coppia di interi rappresentanti la posizione del testo/returns>
+</member>
 <member name="P:LabProg2019.Actions.State.player">
  <summary>
  Il giocatore dello stato
@@ -300,15 +306,6 @@
  <param name="size">La grandezza della finestra di gioco</param>
  <returns>Un nuovo stato, risultato della modifica di quello attuale</returns>
 </member>
-<member name="M:LabProg2019.Actions.drawText(System.String,System.Int32,System.ConsoleColor,LabProg2019.Gfx.wronly_raster,System.Int32,System.Int32)">
- <summary>
- Scrive sulla console di gioco
- </summary>
- <param name="s">La stringa da scrivere</param>
- <param name="index">L'indice, indicante la posizione della voce di menù</param>
- <param name="wr">Il write only raster adibito alla scrittura su schermo</param>
- <param name="size">La grandezza della finestra di gioco</param>
-</member>
 <member name="M:LabProg2019.Actions.solveMaze(LabProg2019.Actions.State,System.ConsoleKeyInfo)">
  <summary>
  Genera un nuovo labirinto risolto
@@ -332,6 +329,15 @@
  <param name="st">Lo stato attuale</param>
  <param name="key">Il testo premuto</param>
  <returns>Un nuovo stato, risultato della modifica di quello attuale</returns>
+</member>
+<member name="M:LabProg2019.Actions.drawMenuText(System.String,System.Int32,System.ConsoleColor,LabProg2019.Gfx.wronly_raster,System.Int32,System.Int32)">
+ <summary>
+ Scrive sulla console di gioco
+ </summary>
+ <param name="s">La stringa da scrivere</param>
+ <param name="index">L'indice, indicante la posizione della voce di menù</param>
+ <param name="wr">Il write only raster adibito alla scrittura su schermo</param>
+ <param name="size">La grandezza della finestra di gioco</param>
 </member>
 <member name="M:LabProg2019.Actions.check_bounds(LabProg2019.Actions.State,System.Double,System.Double)">
  <summary>

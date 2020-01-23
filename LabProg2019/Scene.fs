@@ -41,6 +41,7 @@ type SceneManager (_gameStates: State list, _engine: engine) =
         match s with
         | Game(n,_,_,mv,_,_) -> Game(n,Some player,None,mv,None,(size,size))
         | Menu(n,bg,mv,ls,a,size) -> Menu(n,bg,mv,ls,pos.Value,size)
+        | _ -> s
     
     /// <summary>
     /// Imposta una nuova grandezza a tutti gli stati del gioco
@@ -132,6 +133,10 @@ type SceneManager (_gameStates: State list, _engine: engine) =
             if bg <> None then
                 this.engine.register_sprite bg.Value; 
             this.currentScene <- Some (this.currentScene.Value.move (ConsoleKeyInfo(),wr.Value,t))
+        | Text(_,bg,mv,vs,_,_,_) -> 
+            if bg <> None then
+                this.engine.register_sprite bg.Value
+            this.currentScene <- Some (this.currentScene.Value.move (ConsoleKeyInfo(),wr.Value,vs))
 
 
     /// <summary>
@@ -145,36 +150,47 @@ type SceneManager (_gameStates: State list, _engine: engine) =
             this.changeScene ("menu",wr)
         else
             match key.Value.Key with
-            | ConsoleKey.R -> match this.currentScene.Value with
-                                | Game(_,p,_,_,m,s) -> 
-                                    if this.isPresent "solve" then ()
-                                    else
-                                        this.addScene ("solve",showSolution,true,pg=p.Value,maze=m.Value,size=s)
-                                        this.changeScene ("solve",wr)
-                                        this.gameStates <- this.deleteScene "solve"
-                                | Menu(_,_,_,t,_,_) -> this.currentScene <- Some (this.currentScene.Value.move (key.Value,wr,t))
-            | ConsoleKey.Q -> engine.quit ()
-            | ConsoleKey.M -> 
-                this.changeScene ("menu",wr)
-            | ConsoleKey.F -> match this.currentScene.Value with
-                                | Menu(active = a) -> 
-                                    if this.currentScene.Value.name = "size" then
-                                        if  not (a = this.currentScene.Value.text.Length - 1) then
-                                            let size = int (List.item a this.currentScene.Value.text) + 1
-                                            this.setGameSize size a
-                                            this.changeScene ("size",wr)
+                | ConsoleKey.R -> match this.currentScene.Value with
+                                    | Game(_,p,_,_,m,s) -> 
+                                        if this.isPresent "solve" then ()
+                                        else
+                                            this.addScene ("solve",showSolution,true,pg=p.Value,maze=m.Value,size=s)
+                                            this.changeScene ("solve",wr)
+                                            this.gameStates <- this.deleteScene "solve"
+                                    | Menu(_,_,_,t,_,_) -> this.currentScene <- Some (this.currentScene.Value.move (key.Value,wr,t))
+                                    | _ -> ()
+                | ConsoleKey.Q ->
+                    engine.quit ()
+                | ConsoleKey.M -> 
+                    this.changeScene ("menu",wr)
+                | ConsoleKey.F -> match this.currentScene.Value with
+                                    | Menu(active = a) | Text(active = a) -> 
+                                        if this.currentScene.Value.name = "size" then
+                                            if  not (a = this.currentScene.Value.text.Length - 1) then
+                                                let size = int (List.item a this.currentScene.Value.text) + 1
+                                                this.setGameSize size a
+                                                this.changeScene ("size",wr)
+                                            else
+                                                let name = (List.item a this.currentScene.Value.text).ToLower ()
+                                                this.changeScene (name,wr)
                                         else
                                             let name = (List.item a this.currentScene.Value.text).ToLower ()
+                                            //Continue non definito ancora, serve per prevenire il reset del gioco
+                                            if not (name = "continue") then this.resetGame ()
                                             this.changeScene (name,wr)
-                                    else
-                                        let name = (List.item a this.currentScene.Value.text).ToLower ()
-                                        //Continue non definito ancora, serve per prevenire il reset del gioco
-                                        if not (name = "continue") then this.resetGame ()
-                                        this.changeScene (name,wr)
-                                | _ -> ()
-            | _ -> this.currentScene <- Some(
-                    match this.currentScene.Value with
-                    | Game(_,_,_,_,_,_) -> this.currentScene.Value.move key.Value
-                    | Menu(_,_,_,t,_,_) -> this.currentScene.Value.move (key.Value,wr,t))
-        
+                                    | _ -> ()
+                | _ -> 
+                        match this.currentScene.Value with
+                        | Game(_,_,_,_,_,_) -> 
+                            this.currentScene <- Some (this.currentScene.Value.move key.Value)
+                            let p = this.currentScene.Value.player
+                            let m = this.currentScene.Value.maze
+                            if int p.Value.x = m.finish.y && int p.Value.y = m.finish.x then
+                                this.changeScene("vittoria",wr)
+                            else
+                                this.currentScene <- Some (this.currentScene.Value.move key.Value)
+                        | Menu(_,_,_,t,_,_) -> 
+                            this.currentScene <- Some (this.currentScene.Value.move (key.Value,wr,t))
+                        | Text(_,_,_,vs,_,_,_) -> 
+                            this.currentScene <- Some (this.currentScene.Value.move (key.Value,wr,vs))
             ()
