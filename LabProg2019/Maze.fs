@@ -98,43 +98,61 @@ type Maze (width, height) =
         let x,y = this.player.x,this.player.y
         
         let area = [
+            for i = -radius+1 to radius-1 do
+                for j = -radius+1 to radius-1 do
+                    if checkMatrixBounds(y+j,x+i,this.width,this.height) then
+                        yield this.maze.[y+j,x+i]
+        ]
+
+        let grayArea = [
             for i = -radius to radius do
                 for j = -radius to radius do
                     if checkMatrixBounds(y+j,x+i,this.width,this.height) then
                         yield this.maze.[y+j,x+i]
         ]
 
-        let grayArea = [
+        let darkArea = [
             for i = -radius-1 to radius+1 do
                 for j = -radius-1 to radius+1 do
                     if checkMatrixBounds(y+j,x+i,this.width,this.height) then
                         yield this.maze.[y+j,x+i]
         ]
 
+
+
         let rec aux ls acc =
             match ls with
             | [] -> acc
             | x::xs -> aux xs (List.filter ((<>) x) acc)
+        
+        let a = aux area grayArea
 
-        area, aux area grayArea
+        area,a,aux a darkArea
         
 
     member this.convertAreaToPixel (diameter:int) =
-        let area,grayArea = this.isInArea diameter
+        let area,grayArea,darkArea = this.isInArea diameter
         for x = 0 to (width-1) do
             for y = 0 to (height-1) do
-                if List.exists ((=) this.maze.[x,y]) grayArea then
-                    if this.maze.[x,y].isVisited then
-                        if this.maze.[x,y].isPath then 
-                            this.pixelMap.SetValue (pixel.create('\219',Color.DarkMagenta),x,y)
-                    else 
-                        this.pixelMap.SetValue (pixel.create('\219',Color.DarkGray),x,y)
-                else if List.exists ((=) this.maze.[x,y]) area then
+                if List.exists ((=) this.maze.[x,y]) area then
                     if this.maze.[x,y].isVisited then
                         if this.maze.[x,y].isPath then 
                             this.pixelMap.SetValue (pixel.create('\219',Color.DarkMagenta),x,y)
                     else 
                         this.pixelMap.SetValue (pixel.create('\219',Color.White),x,y)
+                else if List.exists ((=) this.maze.[x,y]) grayArea then
+                    if this.maze.[x,y].isVisited then
+                        if this.maze.[x,y].isPath then 
+                            this.pixelMap.SetValue (pixel.create('\219',Color.DarkMagenta),x,y)
+                    else 
+                        this.pixelMap.SetValue (pixel.create('\219',Color.Gray),x,y)
+                else if List.exists ((=) this.maze.[x,y]) darkArea then
+                    if this.maze.[x,y].isVisited then
+                        if this.maze.[x,y].isPath then 
+                            this.pixelMap.SetValue (pixel.create('\219',Color.DarkMagenta),x,y)
+                    else 
+                        this.pixelMap.SetValue (pixel.create('\219',Color.DarkGray),x,y)
+                
                 else
                         this.pixelMap.SetValue (pixel.create('\219',Color.Black),x,y)
                 
