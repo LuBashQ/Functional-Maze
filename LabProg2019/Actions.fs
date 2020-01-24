@@ -9,16 +9,16 @@ open TreeMaze
 exception PropertyNotImplementedException
 
 /// <summary>
-/// Unione discriminata di Game e Menu che rappresenta la struttura dati principale del gioco
+/// Discriminated union of Game and Menu that represent the game main data structure
 /// </summary>
-/// <param name="name">Il nome dello stato</param>
-/// <param name="pg">Il giocatore dello stato</param>
-/// <param name="bg">Il background dello stato</param>
-/// <param name="move">La funzione che deve eseguire ad ogni ciclo di esecuzione</param>
-/// <param name="maze">La struttura dati del labirinto</param>
-/// <param name="size">La granzedda della finestra di gioco o del labirinto</param>
-/// <param name="voices">Lista contenente le voci di menù</param>
-/// <param name="active">Un numero indicativo della posizione del cursore nel menù</param>
+/// <param name="name">State name</param>
+/// <param name="pg">State player</param>
+/// <param name="bg">State background</param>
+/// <param name="move">The function to execute at every cycle of execution </param>
+/// <param name="maze">Maze data stucture/param>
+/// <param name="size">Window or maze size</param>
+/// <param name="voices">List with menu items</param>
+/// <param name="active">A value that indicate the cursor postion in the menu</param>
 type State =
     | Game of name:string * pg:sprite option * bg:sprite option * 
     move:(State -> ConsoleKeyInfo -> State) * maze: Maze option * size: (int * int) * visibility: int
@@ -29,9 +29,9 @@ type State =
     move:(State -> ConsoleKeyInfo -> wronly_raster -> string list -> (int * int) -> (int*int) ->State) * 
     voices: string list * size: (int*int) * pos: (int*int) * active: int
     /// <summary>
-    /// Il nome dello stato
+    /// State name
     /// </summary>
-    /// <returns>Una stringa indicante il nome lo stato</returns>
+    /// <returns>A string with state name</returns>
     member this.name =
         match this with
         | Game(name = n) | Menu(name = n) | Text(name = n) -> n.ToLower()
@@ -42,9 +42,9 @@ type State =
         | _ -> raise PropertyNotImplementedException
 
     /// <summary>
-    /// Il background dello stato
+    /// Background state
     /// </summary>
-    /// <returns>Uno sprite indicante il background dello stato</returns>
+    /// <returns>A sprite indicating background state</returns>
     member this.background =
         match this with
         | Game(bg = n) -> n.Value
@@ -52,45 +52,45 @@ type State =
         | Text(bg = n) -> n.Value
         
     /// <summary>
-    /// La voce di menù attiva
+    /// The active manu item
     /// </summary>
-    /// <returns>Un intero indicante la voce di menù attiva</returns>
+    /// <returns>A int indicating the menu voice</returns>
     member this.active =
         match this with
         | Menu(active = a) | Text(active = a) -> a
         | _ -> raise PropertyNotImplementedException
     
     /// <summary>
-    /// Il giocatore dello stato
+    ///State palyer
     /// </summary>
-    /// <returns>Uno sprite indicante il giocatore dello stato</returns>
+    /// <returns>A sprite indicating the state player</returns>
     member this.player =
         match this with
         | Game(pg = p) -> p
         | _ -> raise PropertyNotImplementedException
 
     /// <summary>
-    /// La struttura dati del labirinto contenuta nello stato
+    /// Mze Data structure in the state
     /// </summary>
-    /// <returns>La struttura dati del labirinto dello stato</returns>
+    /// <returns>Maze data structure of the state</returns>
     member this.maze =
         match this with
         | Game(maze = m) -> m.Value
         | _ -> raise PropertyNotImplementedException
 
     /// <summary>
-    /// Le voci di menù dello stato
+    /// State menu items
     /// </summary>
-    /// <returns>Una lista di stringhe rappresentanti le voci di menù</returns>
+    /// <returns>A string list representing menu items</returns>
     member this.text =
         match this with
         | Menu(voices = t) | Text(voices = t) -> t
         | _ -> raise PropertyNotImplementedException
 
     /// <summary>
-    /// La grandezza della finestra
+    /// Window size
     /// </summary>
-    /// <returns>Una coppia di interi rappresentanti la grandezza della finestra</returns>
+    /// <returns>A couple of int representing the window size</returns>
     member this.size =
         match this with
         | Game(size = (x,y)) -> x,y
@@ -98,21 +98,21 @@ type State =
         | Text(size = (x,y)) -> x,y
 
     /// <summary>
-    /// La posizione del testo
+    /// Text position
     /// </summary>
-    /// <returns>Una coppia di interi rappresentanti la posizione del testo/returns>
+    /// <returns>A couple of int representing the text position</returns>
     member this.position =
         match this with
         | Text(pos = (x,y)) -> x,y
         | _ -> raise PropertyNotImplementedException
 
     /// <summary>
-    /// Esecuzione dell'azione assegnata allo stato
+    /// Execute the action assigned to state
     /// </summary>
-    /// <param name="k">Il tasto premuto</param>
-    /// <param name="r">Il write only raster adibito alla scrittura su schermo</param>
-    /// <param name="s">La lista di voci di menù</param>
-    /// <returns>Un nuovo stato, risultato della modifica di quello attuale</returns>
+    /// <param name="k">Pressed key</param>
+    /// <param name="r">Write only raster used for screen writing</param>
+    /// <param name="s">Menu items list</param>
+    /// <returns>A new state, that comes from the changes on the actual state</returns>
     member this.move (k,?r:wronly_raster,?s:string list) =
         match this with
         | Game(move = n) -> n this k
@@ -121,12 +121,12 @@ type State =
 
 
 /// <summary>
-/// Controlla se il movimento eseguito è consentito
+/// Check if the movement is allowed
 /// </summary>
-/// <param name="st">Lo stato attuale</param>
-/// <param name="dx">Lo spostamento orizzontale</param>
-/// <param name="dy">Lo spostamento verticale</param>
-/// <returns>Una coppia di float indicante il movimento da eseguire</returns>
+/// <param name="st">Current state</param>
+/// <param name="dx">Horizontal displacement</param>
+/// <param name="dy">Vertical displacement</param>
+/// <returns>A couple of float indicating the action to execute</returns>
 let check_bounds (st:State) (dx: float, dy: float)=
     let vertical = int (st.player.Value.x + dx)
     let horizontal = int (st.player.Value.y + dy)
@@ -139,12 +139,12 @@ let check_bounds (st:State) (dx: float, dy: float)=
         0.,0.
 
 /// <summary>
-/// Scrive sulla console di gioco
+/// Write in the game console
 /// </summary>
-/// <param name="s">La stringa da scrivere</param>
-/// <param name="index">L'indice, indicante la posizione della voce di menù</param>
-/// <param name="wr">Il write only raster adibito alla scrittura su schermo</param>
-/// <param name="size">La grandezza della finestra di gioco</param>
+/// <param name="s">The string to write</param>
+/// <param name="index">Idex of item in menu</param>
+/// <param name="wr">Write only raster used for screen writing</param>
+/// <param name="size">Game window size</param>
 let drawMenuText (s: string) (index: int) (color:ConsoleColor) (wr: wronly_raster) (size: int*int) : unit =
     let x,y = size
     wr.draw_text((sprintf "%s\n\n" s),x/2-3,(y/2 + index),color)
@@ -172,11 +172,11 @@ let rec showText (st: State) (key: ConsoleKeyInfo)  (wr: wronly_raster) (ls: str
     Text(st.name,None,showText,st.text,st.size,st.position,idx)
 
 /// <summary>
-/// Sposta lo sprite in base al tasto premuto
+/// Move the sprite according to the key pressed
 /// </summary>
-/// <param name="st">Lo stato attuale</param>
-/// <param name="key">Il testo premuto</param>
-/// <returns>Un nuovo stato, risultato della modifica di quello attuale</returns>
+/// <param name="st">Current state</param>
+/// <param name="key">Key pressed</param>
+/// <returns>A new state, that comes from the changes on the actual state</returns>
 let movePlayer (st: State) (key: ConsoleKeyInfo): State =
     let dx,dy =
         match key.Key with
@@ -215,11 +215,11 @@ let rec hardModeMove (st: State) (key: ConsoleKeyInfo): State =
 
 
 /// <summary>
-/// Genera un nuovo labirinto
+/// Generates a new maze
 /// </summary>
-/// <param name="st">Lo stato attuale</param>
-/// <param name="key">Il testo premuto</param>
-/// <returns>Un nuovo stato, risultato della modifica di quello attuale</returns>
+/// <param name="st">Current state</param>
+/// <param name="key">Key pressed</param>
+/// <returns>A new state, that comes from the changes on the actual state</returns>
 let generateMaze (st:State) (key: ConsoleKeyInfo) : State = 
     let w,h = st.size
     let maze = new Maze(w,h)
@@ -242,11 +242,11 @@ let generateHardcoreMaze (st:State) (key: ConsoleKeyInfo) : State =
     hardModeMove newState key
 
 /// <summary>
-/// Genera un nuovo labirinto risolto
+/// Generates a new solved maze
 /// </summary>
-/// <param name="st">Lo stato attuale</param>
-/// <param name="key">Il testo premuto</param>
-/// <returns>Un nuovo stato, risultato della modifica di quello attuale</returns>
+/// <param name="st">Current state</param>
+/// <param name="key">Key pressed</param>
+/// <returns>A new state, that comes from the changes on the actual state</returns>
 let solveMaze (st: State) (key: ConsoleKeyInfo) : State =
     let w,h = st.size
     let maze = new Maze(w,h)
@@ -258,16 +258,16 @@ let solveMaze (st: State) (key: ConsoleKeyInfo) : State =
 
 
 /// <summary>
-/// Scrive sulla console di gioco
+/// Write in game console
 /// </summary>
-/// <param name="s">La stringa da scrivere</param>
-/// <param name="index">L'indice, indicante la posizione della voce di menù</param>
-/// <param name="wr">Il write only raster adibito alla scrittura su schermo</param>
-/// <param name="size">La grandezza della finestra di gioco</param>
-/// <returns>Un nuovo stato, risultato della modifica di quello attuale</returns>
+/// <param name="s"String to write</param>
+/// <param name="index">Index indicating menu item</param>
+/// <param name="wr">Write only raster used for screen writing</param>
+/// <param name="size">Game window size</param>
+/// <returns>A new state, that comes from the changes on the actual state</returns>
 let rec showMenu (st: State) (key: ConsoleKeyInfo)  (wr: wronly_raster) (ls: string list) (size: int*int) : State =
     
-    // Permette lo scorrimento delle voci di menù dall'alto verso il basso e viceversa in modo circolare
+    // Allow the scrolling of menu items from top to bottom and the other way around in a circolar way
     let idx = match key.Key with
                 | ConsoleKey.S | ConsoleKey.DownArrow -> (st.active + 1) % (List.length ls)
                 | ConsoleKey.W | ConsoleKey.UpArrow -> abs (((st.active - 1) + List.length ls) % (List.length ls))
@@ -286,11 +286,11 @@ let rec showMenu (st: State) (key: ConsoleKeyInfo)  (wr: wronly_raster) (ls: str
     Menu(st.name,None,showMenu,st.text,idx,size)
 
 /// <summary>
-/// Mostra la soluzione del labirinto attuale
+/// Show the current maze solution
 /// </summary>
-/// <param name="st">Lo stato attuale</param>
-/// <param name="key">Il testo premuto</param>
-/// <returns>Un nuovo stato, risultato della modifica di quello attuale</returns>
+/// <param name="st">Current state</param>
+/// <param name="key">Key pressed</param>
+/// <returns>A new state, that comes from the changes on the actual state</returns>
 let showSolution (st: State) (key: ConsoleKeyInfo) : State =
     let solved = solveRecursive st.maze
     let background = Some (solved.toSprite(0))

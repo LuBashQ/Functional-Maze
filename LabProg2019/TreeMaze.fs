@@ -5,11 +5,11 @@ open Maze
 
 
 /// <summary>
-/// Tipo Tree
+/// Type Tree
 /// </summary>
-/// <param name="parent">Il nodo padre</param>
-/// <param name="value">La cella contenuta nel nodo</param>
-/// <param name="children">I figli della cella</param>
+/// <param name="parent">Parent node</param>
+/// <param name="value">Cell in the node</param>
+/// <param name="children">Cell children</param>
 [<NoComparison>]
 type Tree = {
     parent : Tree option
@@ -18,30 +18,30 @@ type Tree = {
 }
 
 /// <summary>
-/// Ricava tutti i figli di un nodo dell'albero
+/// Get all children of a tree node
 /// </summary>
-/// <param name="node">Il nodo dell'albero</param>
-/// <param name="maze">La matrice che identifica il labirinto</param>
+/// <param name="node">Tree node</param>
+/// <param name="maze">Matrix that identify the maze</param>
 let getChildren (node: Tree, maze: Cell[,]) =
     if (node.parent = None) then node.children <- node.value.children(maze,node.value)
     else node.children <- node.value.children(maze,node.parent.Value.value)
 
 
 /// <summary>
-/// Ricava ricorsivamente tutte le celle padre della foglia corrispondente all'uscita del labirinto
+/// Get recursively all parent cell of the maze exit leaf
 /// </summary>
-/// <param name="leaf">La foglia dell'albero</param>
-/// <returns>Una lista di celle</returns>
+/// <param name="leaf">Tree leaf</param>
+/// <returns>Cell list</returns>
 let rec retrievePath (leaf: Tree option) =
     if (leaf.Value.parent = None) then [leaf.Value.value]
     else leaf.Value.value::retrievePath(leaf.Value.parent)
 
 /// <summary>
-/// Modifica le celle della matrice in modo da rapprensentare la strada 
+/// Modify the matrix cells to modify the path
 /// </summary>
-/// <param name="root">La radice dell'albero</param>
-/// <param name="maze">La struttura dati del labirinto</param>
-/// <returns>la struttura dati del labirinto modificata</returns>
+/// <param name="root">Tree root</param>
+/// <param name="maze">Maze data structure</param>
+/// <returns>Modified maze data structure</returns>
 let buildPath (root: Tree option, maze: Maze) =
     if root = None then 
         maze
@@ -52,10 +52,10 @@ let buildPath (root: Tree option, maze: Maze) =
         maze
 
 /// <summary>
-/// Algoritmo iterativo di risoluzione del labirinto basato sull'utilizzo di un albero n-ario
+/// Iterative solving algotihm based on n-ary tree
 /// </summary>
-/// <param name="maze">La struttura dati del labirinto</param>
-/// <returns>la struttura dati del labirinto modificata</returns>
+/// <param name="maze">Maze data structure</param>
+/// <returns>Maze modified data structure</returns>
 let solveIterative (maze: Maze) =
     let tree = {
         parent = None; value = maze.start; children = []
@@ -81,11 +81,11 @@ let solveIterative (maze: Maze) =
 
 
 /// <summary>
-/// Algoritmo di ricerca in profondità di un albero n-ario, usato per generare la gerarchia padre-figlio
+/// In-depth searching algorithm of n-ary tree, used to generate the hierarchy parent-child
 /// </summary>
-/// <param name="maze">La struttura dati del labirinto</param>
-/// <param name="queue">Una coda</param>
-/// <returns>La foglia corrispondente all'uscita del labirinto</returns>
+/// <param name="maze">Maze data structure</param>
+/// <param name="queue">A tail</param>
+/// <returns>The leaf corresponding to the maze exit</returns>
 let rec findHierarchy (maze: Maze, queue: Queue<Tree>) =
     if queue.Count = 0 then None
     else
@@ -107,10 +107,10 @@ let rec findHierarchy (maze: Maze, queue: Queue<Tree>) =
 
 
 /// <summary>
-/// Algoritmo ricorsivo di risoluzione del labirinto, usando un albero n-ario
+/// Recursive solving algorithm for the maze, using n-ary tree
 /// </summary>
-/// <param name="maze">La struttura dati del labirinto</param>
-/// <returns>la struttura dati del labirinto modificata</returns>
+/// <param name="maze">Maze data structure</param>
+/// <returns>Modified maze data structure</returns>
 let rec solveRecursive (maze: Maze)=
     let tree = {
         parent = None; value = maze.start; children = []

@@ -99,7 +99,7 @@ type engine (w : int, h : int, ?fps_cap : int, ?flip_queue) =
         { data with frame_cnt = data.frame_cnt + 1; elapsed = ts }
     
 
-    //leggera modifica per forzare l'esecuzione di update per mostrare il menu correttamente
+    //few mods down here to make menu work
     member this.loop_on_key update =
         Log.msg "entering engine on-key loop..."
         let mutable data = { frame_cnt = 0; elapsed = new TimeSpan (); now = DateTime.Now }

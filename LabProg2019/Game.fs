@@ -13,7 +13,7 @@ let main () =
     let engine = new engine (W,H)
     let player = sprite(image.rectangle(1,1,pixel.filled Color.Red),1,1,1)
 
-    // Generazione degli stati supportati dal gioco
+    // Game states generalization
     let maze = Game("normal",Some player,None,generateMaze,None,(W,H),0)
     let hardcoreMaze = Game("hardcore",Some player,None,generateHardcoreMaze,None,(W,H),5)
     let solved = Game("solved",Some player,None,solveMaze,None,(W,H),0)
@@ -27,5 +27,5 @@ let main () =
 
     let sceneManager = SceneManager([menu;maze;solved;options;size;help;win;hardcoreMaze;visibility],engine)
 
-    // Esecuzione del gioco
+    // Game execution
     engine.loop_on_key <| sceneManager.execute engine

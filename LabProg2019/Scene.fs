@@ -7,10 +7,10 @@ open Maze
 exception EmptyQueueException
 
 /// <summary>
-/// Tipo SceneManager
+/// Type SceneManager
 /// </summary>
-/// <param name="_gameStates">Gli stati supportati dal gioco</param>
-/// <param name="_engine">Il motore di gioco</param>
+/// <param name="_gameStates">Game supported states</param>
+/// <param name="_engine">Game engine</param>
 type SceneManager (_gameStates: State list, _engine: engine) =
 
     member val gameStates = _gameStates with get,set
@@ -19,10 +19,10 @@ type SceneManager (_gameStates: State list, _engine: engine) =
 
 
     /// <summary>
-    /// Esegue il reset di uno stato
+    /// Reset a state
     /// </summary>
-    /// <param name="s">Lo stato attuale</param>
-    /// <returns>Un nuovo stato default</returns>
+    /// <param name="s">Current state</param>
+    /// <returns>A new default state</returns>
     member private this.resetState s =
         let player = sprite(image.rectangle(1,1,pixel.filled Color.Red),1,1,1)
         match s with
@@ -30,12 +30,12 @@ type SceneManager (_gameStates: State list, _engine: engine) =
         | _ -> s
 
     /// <summary>
-    /// Cambia le dimensioni del labirinto 
+    /// Change maze size
     /// </summary>
-    /// <param name="s">Lo stato attuale</param>
-    /// <param name="size">La nuova grandezza</param>
-    /// <param name="pos">La nuova posizione del cursore nel menù</param>
-    /// <returns>Un nuovo stato con la grandezza modificata</returns>
+    /// <param name="s">Current state</param>
+    /// <param name="size">New size</param>
+    /// <param name="pos">Cursor position in the menu</param>
+    /// <returns>New state with modified size</returns>
     member private this.setSize (s,size,?pos) =
         let player = sprite(image.rectangle(1,1,pixel.filled Color.Red),1,1,1)
         match s with
@@ -43,7 +43,13 @@ type SceneManager (_gameStates: State list, _engine: engine) =
         | Menu(n,bg,mv,ls,a,size) -> Menu(n,bg,mv,ls,pos.Value,size)
         | _ -> s
     
-   
+    /// <summary>
+    /// Change the radius of visible maze (in hard mode)
+    /// </summary>
+    /// <param name="s">Current status</param>
+    /// <param name="visibility"> TO-----------------------------------------------------------MODIFY </param>
+    /// <param name="pos">Position of the sprite</param>
+    /// <returns>A new state, that comes from the changes on the actual state</returns>
     member private this.setVisiblity (s,visibility,?pos) =
         let player = sprite(image.rectangle(1,1,pixel.filled Color.Red),1,1,1)
         match s with
@@ -51,69 +57,74 @@ type SceneManager (_gameStates: State list, _engine: engine) =
         | Menu(n,bg,mv,ls,a,size) -> Menu(n,bg,mv,ls,pos.Value,size)
         | _ -> s
 
+    /// <summary>
+    /// Change the visibility of all game states
+    /// </summary>
+    /// <param name="v">TO----------------------------------------------------------------------------MODIFY</param>
+    /// <param name="pos">Position of the sprite</param>
     member private this.setGameVisibility v pos =
         this.gameStates <- List.map(fun (s:State) -> this.setVisiblity (s,v,pos)) this.gameStates 
    
    /// <summary>
-    /// Imposta una nuova grandezza a tutti gli stati del gioco
+    /// Set new size to all game states
     /// </summary>
-    /// <param name="size">La nuova grandezza</param>
-    /// <param name="pos">La nuova posizione del cursore nel menù</param>
+    /// <param name="size">New size</param>
+    /// <param name="pos">New cursor position in the menu</param>
     member private this.setGameSize size pos =
         this.gameStates <- List.map(fun (s:State) -> this.setSize (s,size,pos)) this.gameStates 
 
     /// <summary>
-    /// Esegue il reset di tutti gli stati del gioco
+    /// Reset all game states
     /// </summary>
     member private this.resetGame () =
         this.gameStates <- List.map(fun (s:State) -> this.resetState s) this.gameStates 
 
     /// <summary>
-    /// Cerca uno stato all'interno della lista degli stati di gioco
+    /// Search a state in the game states list
     /// </summary>
-    /// <param name="name">Il nome dello stato</param>
-    /// <returns>Una lista contenente lo stato cercato</returns>
+    /// <param name="name">State name</param>
+    /// <returns>A list with the requested state</returns>
     member this.getScene name =
         List.find (fun (s:State) -> s.name = name) this.gameStates
     
     /// <summary>
-    /// Rimuove uno stato dall'interno della lista degli stati di gioco
+    /// Remove a state form the game states list 
     /// </summary>
-    /// <param name="name">Il nome dello stato</param>
-    /// <returns>Una lista contenente gli stati del gioco escluso quello rimosso</returns>
+    /// <param name="name">The state name</param>
+    /// <returns>A list with all game states without the removed one</returns>
     member this.deleteScene name =
         List.filter (fun (s:State) -> s.name <> name) this.gameStates
 
     /// <summary>
-    /// Imposta lo stato corrente
+    /// Set the current state
     /// </summary>
-    /// <param name="name">Il nome dello stato</param>
+    /// <param name="name">State name</param>
     member private this.setCurrentScene name =
         this.currentScene <- Some (this.getScene name)
     
     /// <summary>
-    /// Controlla l'esistenza di uno stato all'interno della lista degli stati di gioco
+    /// Check for the if exists a state in the game states list
     /// </summary>
-    /// <param name="name">Il nome dello stato</param>
-    /// <returns>Un boolean rappresentante l'esito della ricerca</returns>
+    /// <param name="name">State name</param>
+    /// <returns>A boolean that express the research result</returns>
     member this.isPresent name =
         List.exists (fun (e:State) -> e.name = name) this.gameStates
 
     
     /// <summary>
-    /// Aggiunge un nuovo stato alla lista degli stati di gioco
+    /// Add a new state to game states list
     /// </summary>
-    /// <param name="name">Il nome dello stato</param>
-    /// <param name="move">La funzione da eseguire ad ogni ciclo di esecuzione (per Game)</param>
-    /// <param name="game">Valore indicante se lo stato è Game o Menu</param>
-    /// <param name="bg">Il background dello stato</param>
-    /// <param name="pg">Il giocatore dello stato</param>
-    /// <param name="name">Il nome dello stato</param>
-    /// <param name="maze">La struttura dati rapprensentante il labirinto</param>
-    /// <param name="voices">Le voci di menù</param>
-    /// <param name="active">La posizione del cursore nel menù</param>
-    /// <param name="menu">La funzione da eseguire ad ogni ciclo di esecuzione (per Menu)</param>
-    /// <param name="size">La grandezza della finestra o del labirinto</param>
+    /// <param name="name">State name</param>
+    /// <param name="move">The function to execute at every cycle of execution (Game only)</param>
+    /// <param name="game">Value that express if state is Game or Menu</param>
+    /// <param name="bg">Background state</param>
+    /// <param name="pg">Player state</param>
+    /// <param name="name">State name</param>
+    /// <param name="maze">Data structure representing the maze</param>
+    /// <param name="voices">Menu elements</param>
+    /// <param name="active">Cursor position in menu</param>
+    /// <param name="menu">The function to execute at every cycle of execution (Menu only)</param>
+    /// <param name="size">Window or maze size</param>
     member private this.addScene (n:string, move: (State->ConsoleKeyInfo->State), 
         game: bool, ?bg:sprite, ?pg:sprite, ?maze: Maze, ?voices: string list, ?active: int, 
         ?menu:(State->ConsoleKeyInfo->wronly_raster->string list->(int*int)->State), ?size: int*int, ?visibility: int) : unit =
@@ -127,13 +138,13 @@ type SceneManager (_gameStates: State list, _engine: engine) =
 
 
     /// <summary>
-    /// Cambia la scena attuale
+    /// Change the actual scene
     /// </summary>
-    /// <param name="name">Il nome dello stato</param>
+    /// <param name="name">State name</param>
     member this.changeScene (name,?wr) =
         this.setCurrentScene name
         
-        //pulisce tutti gli sprite
+        //clear all sprites
         this.engine.removeAll ()
         match this.currentScene.Value with
         | Game(pg = p) -> 
@@ -151,11 +162,11 @@ type SceneManager (_gameStates: State list, _engine: engine) =
 
 
     /// <summary>
-    /// Controlla il testo premuto ed esegue la funzione adeguata
+    /// Check the pressed key and execute the corresponding action 
     /// </summary>
-    /// <param name="engine">Il motore di gioco</param>
-    /// <param name="key">Il tasto premuto</param>
-    /// <param name="wr">Il write only raster adibito alla scrittura a schermo</param>
+    /// <param name="engine">Game engine</param>
+    /// <param name="key">Pressed key</param>
+    /// <param name="wr">Write only raster used for screen writing</param>
     member this.execute (engine: engine) (key:ConsoleKeyInfo option) (wr: wronly_raster) = 
         
         if this.currentScene.IsNone then 

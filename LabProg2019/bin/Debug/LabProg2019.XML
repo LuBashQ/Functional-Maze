@@ -350,16 +350,16 @@
 </member>
 <member name="M:LabProg2019.Scene.SceneManager.setSize(LabProg2019.Actions.State,System.Int32,Microsoft.FSharp.Core.FSharpOption{System.Int32})">
  <summary>
- Cambia le dimensioni del labirinto 
+ Change maze size
  </summary>
- <param name="s">Lo stato attuale</param>
- <param name="size">La nuova grandezza</param>
- <param name="pos">La nuova posizione del cursore nel menù</param>
- <returns>Un nuovo stato con la grandezza modificata</returns>
+ <param name="s">Current state</param>
+ <param name="size">New dimension</param>
+ <param name="pos">New cursor position in the menu</param>
+ <returns>New state with modified dimention</returns>
 </member>
 <member name="M:LabProg2019.Scene.SceneManager.setGameSize(System.Int32,System.Int32)">
  <summary>
- Imposta una nuova grandezza a tutti gli stati del gioco
+ Imposta una nuova grandezza a tutti gli stati del gioco Set new size
  </summary>
  <param name="size">La nuova grandezza</param>
  <param name="pos">La nuova posizione del cursore nel menù</param>
@@ -372,10 +372,10 @@
 </member>
 <member name="M:LabProg2019.Scene.SceneManager.resetState(LabProg2019.Actions.State)">
  <summary>
- Esegue il reset di uno stato
+ Reset a state
  </summary>
- <param name="s">Lo stato attuale</param>
- <returns>Un nuovo stato default</returns>
+ <param name="s">Current state</param>
+ <returns>A new default state</returns>
 </member>
 <member name="M:LabProg2019.Scene.SceneManager.resetGame">
  <summary>
@@ -435,9 +435,9 @@
 </member>
 <member name="T:LabProg2019.Scene.SceneManager">
  <summary>
- Tipo SceneManager
+ Type SceneManager
  </summary>
- <param name="_gameStates">Gli stati supportati dal gioco</param>
+ <param name="_gameStates">Game supported states</param>
  <param name="_engine">Il motore di gioco</param>
 </member>
 </members>
