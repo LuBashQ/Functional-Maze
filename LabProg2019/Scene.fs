@@ -138,7 +138,7 @@ type SceneManager (_gameStates: State list, _engine: engine) =
 
 
     /// <summary>
-    /// Change the actual scene
+    /// Change the current scene
     /// </summary>
     /// <param name="name">State name</param>
     member this.changeScene (name,?wr) =
@@ -170,13 +170,8 @@ type SceneManager (_gameStates: State list, _engine: engine) =
     member this.execute (engine: engine) (key:ConsoleKeyInfo option) (wr: wronly_raster) = 
         
         if this.currentScene.IsNone then 
-            this.changeScene ("menu",wr)
+            this.changeScene ("help",wr)  //in order to start the program with help tab
         else
-
-            match this.currentScene.Value with
-            | Game(_,_,_,_,_,_,_) -> Console.Beep(500,10)
-            | _ -> Console.Beep(800,10)
-
             match key.Value.Key with
                 | ConsoleKey.R -> match this.currentScene.Value with
                                     | Game(_,p,_,_,m,s,v) -> 
@@ -196,11 +191,18 @@ type SceneManager (_gameStates: State list, _engine: engine) =
                                             let option = List.item a this.currentScene.Value.text
                                             match this.currentScene.Value.name with
                                             | "size" -> 
-                                                this.setGameSize (int option + 1) a
-                                                this.changeScene ("size",wr)
+                                                Log.msg "%A" option 
+                                                if option="OPTIONS" then 
+                                                    this.changeScene ("options", wr)
+                                                else
+                                                    this.setGameSize (int option + 1) a
+                                                    this.changeScene ("size",wr)
                                             | "visibility" -> 
-                                                this.setGameVisibility (int option + 1) a
-                                                this.changeScene ("visibility",wr)
+                                                if option="OPTIONS" then 
+                                                    this.changeScene ("options", wr)
+                                                else
+                                                    this.setGameVisibility (int option + 1) a
+                                                    this.changeScene ("visibility",wr)
                                             | _ -> 
                                                 let op = option.ToLower()
                                                 if op = "quit" then engine.quit()
