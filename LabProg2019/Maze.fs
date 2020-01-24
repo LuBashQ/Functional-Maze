@@ -12,12 +12,12 @@ exception InvalidInsertionException
 
 
 /// <summary>
-/// Tipo Cella
+/// Type Cell
 /// </summary>
-/// <param name="_x">L'ascissa della cella</param>
-/// <param name="_y">L'ordinata della cella</param>
-/// <param name="_mazeW">La larghezza del labirinto</param>
-/// <param name="_mazeH">L'altezza del labirinto</param>
+/// <param name="_x">Cell abscissa</param>
+/// <param name="_y">Cell ordinate</param>
+/// <param name="_mazeW">Maze width</param>
+/// <param name="_mazeH">Maze height</param>
 type Cell (_x: int, _y: int, _mazeW: int, _mazeH: int) =
     member val x = _x with get,set
     member val y = _y with get,set
@@ -29,10 +29,10 @@ type Cell (_x: int, _y: int, _mazeW: int, _mazeH: int) =
     member val isDeadEnd = false with get,set
 
     /// <summary>
-    /// Controlla e ritorna i possibili vicini della cella
+    /// Check and return the possible cell neighbors
     /// </summary>
-    /// <param name="maze">La matrice di celle in cui si trova</param>
-    /// <returns>Una Cell list contenente i vicini della cella</returns>
+    /// <param name="maze">Cell matrix</param>
+    /// <returns>A Cell list containing cell neighbors</returns>
     member this.neighbors (maze: Cell[,]) =
         [   
             if checkMatrixBounds (this.x - 2, this.y,this.mazeW,this.mazeH) then maze.[this.x - 2, this.y]
@@ -42,11 +42,11 @@ type Cell (_x: int, _y: int, _mazeW: int, _mazeH: int) =
         ] |> List.filter (fun cell -> not cell.isVisited)
     
     /// <summary>
-    /// Controlla e ritorna i possibili figli della cella (ovvero le celle non-muro vicine)
+    /// Check and return the possible cell children (that are the non-wall near cells)
     /// </summary>
-    /// <param name="maze">La matrice di celle in cui si trova</param>
-    /// <param name="parent">La cella padre</param>
-    /// <returns>Una Cell list contenente i figli della cella</returns>
+    /// <param name="maze">Cell matrix</param>
+    /// <param name="parent">Parent cell</param>
+    /// <returns>A Cell list containing cell son</returns>
     member this.children (maze: Cell[,], parent: Cell) =
         [   
             if checkMatrixBounds (this.x - 1, this.y,this.mazeW,this.mazeH) then maze.[this.x - 1, this.y]
@@ -57,15 +57,15 @@ type Cell (_x: int, _y: int, _mazeW: int, _mazeH: int) =
 
 
 /// <summary>
-/// Tipo Maze
+/// Type Maze
 /// </summary>
-/// <param name="width">La larghezza del labirinto</param>
-/// <param name="heigth">L'altezza del labirinto</param>
+/// <param name="width">Maze with</param>
+/// <param name="heigth">Maze height</param>
 type Maze (width, height) =
     
     let rnd = rnd_int 1 (width - 1)
     
-    ///<summary>Ricava una colonna disponibile per la creazione dell'uscita</summary>
+    ///<summary>Return a valid column for the creation of the exit</summary>
     let yAxisPosition = if  rnd % 2 <> 0 then rnd else rnd - 1
 
     member val width = width with get
@@ -78,9 +78,9 @@ type Maze (width, height) =
 
 
     /// <summary>
-    /// Converte una matrice di Cell in un array di CharInfo
+    /// Convert a cell matrix into array of CharInfo
     /// </summary>
-    /// <returns>Una un array di CharInfo</returns>
+    /// <returns>An array of CharInfo</returns>
     member this.convertToPixel () =
         for x = 0 to (width-1) do
             for y = 0 to (height-1) do
@@ -161,11 +161,11 @@ type Maze (width, height) =
         toArray this.pixelMap
 
     /// <summary>
-    /// Implementazione dell'algoritmo "recursive backtracker", 
-    /// preso da https://en.wikipedia.org/wiki/Maze_generation_algorithm
+    /// "recursive backtracker" algorithm implementation, take from
+    ///  https://en.wikipedia.org/wiki/Maze_generation_algorithm
     /// </summary>
-    /// <exception cref="InvalidInsertionException">Viene lanciata quando la cella corrente e quella successiva
-    /// non hanno nè ascissa nè ordinata in comune
+    /// <exception cref="InvalidInsertionException">
+    /// It is raised when current and next cell has neither abscissa nor ordinate in common
     /// </exception>
     member private this.initialize () =                                                 
         let stack = new Stack<Cell>()
@@ -194,9 +194,9 @@ type Maze (width, height) =
 
 
     /// <summary>
-    /// Converte un array di pixel in uno sprite 
+    /// Convert a pixel array into a sprite
     /// </summary>
-    /// <returns>Uno sprite contenente il labirinto</returns>
+    /// <returns>A sprite containing the maze</returns>
     /// <seealso cref="this.convertToPixel"/>
     member this.toSprite (t:int,?diameter:int) =
         match t with
@@ -205,7 +205,7 @@ type Maze (width, height) =
 
     
     /// <summary>
-    /// Genera e imposta entrata e uscita del labirinto
+    /// Generete and set maze entry and exit
     /// </summary>
     /// <seealso cref="this.initialize"/>
     member this.generate () =
