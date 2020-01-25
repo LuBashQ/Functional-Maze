@@ -1,4 +1,4 @@
-﻿module LabProg2019.Scene
+﻿module LabProg2019.StateManager
 open Gfx
 open System
 open Engine
@@ -11,7 +11,7 @@ exception EmptyQueueException
 /// </summary>
 /// <param name="_gameStates">Game supported states</param>
 /// <param name="_engine">Game engine</param>
-type SceneManager (_gameStates: State list, _engine: engine) =
+type StateManager (_gameStates: State list, _engine: engine) =
 
     member val gameStates = _gameStates with get,set
     member val currentScene = None with get,set
@@ -19,24 +19,24 @@ type SceneManager (_gameStates: State list, _engine: engine) =
 
 
     /// <summary>
-    /// Reset a state
+    /// Resets a state
     /// </summary>
     /// <param name="s">Current state</param>
     /// <returns>A new default state</returns>
-    member private this.resetState s =
+    member private this.resetState s : State =
         let player = sprite(image.rectangle(1,1,pixel.filled Color.Red),1,1,1)
         match s with
         | Game(n,_,_,mv,_,size,v) -> Game(n,Some player,None,mv,None,size,v)
         | _ -> s
 
     /// <summary>
-    /// Change maze size
+    /// Changes maze size
     /// </summary>
     /// <param name="s">Current state</param>
     /// <param name="size">New size</param>
     /// <param name="pos">Cursor position in the menu</param>
     /// <returns>New state with modified size</returns>
-    member private this.setSize (s,size,?pos) =
+    member private this.setSize (s:State, size:int, ?pos:int) : State =
         let player = sprite(image.rectangle(1,1,pixel.filled Color.Red),1,1,1)
         match s with
         | Game(n,_,_,mv,_,_,v) -> Game(n,Some player,None,mv,None,(size,size),v)
@@ -44,13 +44,13 @@ type SceneManager (_gameStates: State list, _engine: engine) =
         | _ -> s
     
     /// <summary>
-    /// Change the radius of visible maze (in hard mode)
+    /// Changes the radius of visible maze (in hard mode)
     /// </summary>
     /// <param name="s">Current status</param>
-    /// <param name="visibility"> TO-----------------------------------------------------------MODIFY </param>
+    /// <param name="visibility">New visibility value</param>
     /// <param name="pos">Position of the sprite</param>
     /// <returns>A new state, that comes from the changes on the actual state</returns>
-    member private this.setVisiblity (s,visibility,?pos) =
+    member private this.setVisiblity (s:State, visibility:int ,?pos: int) : State =
         let player = sprite(image.rectangle(1,1,pixel.filled Color.Red),1,1,1)
         match s with
         | Game(n,_,_,mv,_,s,v) -> Game(n,Some player,None,mv,None,s,visibility)
@@ -58,61 +58,61 @@ type SceneManager (_gameStates: State list, _engine: engine) =
         | _ -> s
 
     /// <summary>
-    /// Change the visibility of all game states
+    /// Changes the visibility of all game states
     /// </summary>
-    /// <param name="v">TO----------------------------------------------------------------------------MODIFY</param>
+    /// <param name="v">New visibility value</param>
     /// <param name="pos">Position of the sprite</param>
-    member private this.setGameVisibility v pos =
+    member private this.setGameVisibility (v:int) (pos:int) : unit =
         this.gameStates <- List.map(fun (s:State) -> this.setVisiblity (s,v,pos)) this.gameStates 
    
    /// <summary>
-    /// Set new size to all game states
+    /// Sets new size to all game states
     /// </summary>
     /// <param name="size">New size</param>
     /// <param name="pos">New cursor position in the menu</param>
-    member private this.setGameSize size pos =
+    member private this.setGameSize (size:int) (pos:int) : unit =
         this.gameStates <- List.map(fun (s:State) -> this.setSize (s,size,pos)) this.gameStates 
 
     /// <summary>
-    /// Reset all game states
+    /// Resets all game states
     /// </summary>
-    member private this.resetGame () =
+    member private this.resetGame () : unit =
         this.gameStates <- List.map(fun (s:State) -> this.resetState s) this.gameStates 
 
     /// <summary>
-    /// Search a state in the game states list
+    /// Searches a state in the game states list
     /// </summary>
     /// <param name="name">State name</param>
     /// <returns>A list with the requested state</returns>
-    member this.getScene name =
+    member this.getState (name:string) : State =
         List.find (fun (s:State) -> s.name = name) this.gameStates
     
     /// <summary>
-    /// Remove a state form the game states list 
+    /// Removes a state form the game states list 
     /// </summary>
     /// <param name="name">The state name</param>
     /// <returns>A list with all game states without the removed one</returns>
-    member this.deleteScene name =
+    member this.deleteState (name:string) : State list =
         List.filter (fun (s:State) -> s.name <> name) this.gameStates
 
     /// <summary>
-    /// Set the current state
+    /// Sets the current state
     /// </summary>
     /// <param name="name">State name</param>
-    member private this.setCurrentScene name =
-        this.currentScene <- Some (this.getScene name)
+    member private this.setCurrentState (name:string) : unit =
+        this.currentScene <- Some (this.getState name)
     
     /// <summary>
-    /// Check for the if exists a state in the game states list
+    /// Checks for the if exists a state in the game states list
     /// </summary>
     /// <param name="name">State name</param>
     /// <returns>A boolean that express the research result</returns>
-    member this.isPresent name =
+    member this.isPresent (name:string) : bool =
         List.exists (fun (e:State) -> e.name = name) this.gameStates
 
     
     /// <summary>
-    /// Add a new state to game states list
+    /// Adds a new state to game states list
     /// </summary>
     /// <param name="name">State name</param>
     /// <param name="move">The function to execute at every cycle of execution (Game only)</param>
@@ -138,11 +138,11 @@ type SceneManager (_gameStates: State list, _engine: engine) =
 
 
     /// <summary>
-    /// Change the current scene
+    /// Changes the current scene
     /// </summary>
     /// <param name="name">State name</param>
-    member this.changeScene (name,?wr) =
-        this.setCurrentScene name
+    member this.changeScene (name:string, ?wr:wronly_raster) : unit =
+        this.setCurrentState name
         
         //clear all sprites
         this.engine.removeAll ()
@@ -162,15 +162,15 @@ type SceneManager (_gameStates: State list, _engine: engine) =
 
 
     /// <summary>
-    /// Check the pressed key and execute the corresponding action 
+    /// Checks the pressed key and execute the corresponding action 
     /// </summary>
     /// <param name="engine">Game engine</param>
     /// <param name="key">Pressed key</param>
     /// <param name="wr">Write only raster used for screen writing</param>
-    member this.execute (engine: engine) (key:ConsoleKeyInfo option) (wr: wronly_raster) = 
+    member this.execute (engine: engine) (key:ConsoleKeyInfo option) (wr: wronly_raster) : unit= 
         
         if this.currentScene.IsNone then 
-            this.changeScene ("help",wr)  //in order to start the program with help tab
+            this.changeScene ("help",wr)  //If no scene i selected, by default brings ulp the help page
         else
             match key.Value.Key with
                 | ConsoleKey.R -> match this.currentScene.Value with
@@ -179,7 +179,7 @@ type SceneManager (_gameStates: State list, _engine: engine) =
                                         else
                                             this.addScene ("solve",showSolution,true,pg=p.Value,maze=m.Value,size=s,visibility=v)
                                             this.changeScene ("solve",wr)
-                                            this.gameStates <- this.deleteScene "solve"
+                                            this.gameStates <- this.deleteState "solve"
                                     | Menu(_,_,_,t,_,_) -> this.currentScene <- Some (this.currentScene.Value.move (key.Value,wr,t))
                                     | _ -> ()
                 | ConsoleKey.Q ->
@@ -191,7 +191,6 @@ type SceneManager (_gameStates: State list, _engine: engine) =
                                             let option = List.item a this.currentScene.Value.text
                                             match this.currentScene.Value.name with
                                             | "size" -> 
-                                                Log.msg "%A" option 
                                                 if option="OPTIONS" then 
                                                     this.changeScene ("options", wr)
                                                 else
@@ -215,10 +214,10 @@ type SceneManager (_gameStates: State list, _engine: engine) =
                             this.currentScene <- Some (this.currentScene.Value.move key.Value)
                             let p = this.currentScene.Value.player
                             let m = this.currentScene.Value.maze
-                            if int p.Value.x = m.finish.y && int p.Value.y = m.finish.x then
+                            if int p.x = m.finish.y && int p.y = m.finish.x then
                                 this.changeScene("win",wr)
                             else
-                                this.gameStates <- this.deleteScene this.currentScene.Value.name
+                                this.gameStates <- this.deleteState this.currentScene.Value.name
                                 let scene = this.currentScene.Value
                                 match scene with
                                 | Game(n,pg,bg,mv,maze,size,v) ->

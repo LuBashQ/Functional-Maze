@@ -4,7 +4,7 @@ open Gfx
 open System
 open Maze
 open TreeMaze
-
+open Cell
 
 exception PropertyNotImplementedException
 
@@ -29,10 +29,10 @@ type State =
     move:(State -> ConsoleKeyInfo -> wronly_raster -> string list -> (int * int) -> (int*int) ->State) * 
     voices: string list * size: (int*int) * pos: (int*int) * active: int
     /// <summary>
-    /// State name
+    /// Gets the state's name
     /// </summary>
     /// <returns>A string with state name</returns>
-    member this.name =
+    member this.name : string =
         match this with
         | Game(name = n) | Menu(name = n) | Text(name = n) -> n.ToLower()
     
@@ -42,78 +42,79 @@ type State =
         | _ -> raise PropertyNotImplementedException
 
     /// <summary>
-    /// Background state
+    /// Gets the state's background
     /// </summary>
     /// <returns>A sprite indicating background state</returns>
-    member this.background =
+    member this.background : sprite =
         match this with
         | Game(bg = n) -> n.Value
         | Menu(bg = n) -> n.Value
         | Text(bg = n) -> n.Value
         
     /// <summary>
-    /// The active manu item
+    /// Gets the state's active menu voice
     /// </summary>
     /// <returns>A int indicating the menu voice</returns>
-    member this.active =
+    member this.active : int =
         match this with
         | Menu(active = a) | Text(active = a) -> a
         | _ -> raise PropertyNotImplementedException
     
     /// <summary>
-    ///State palyer
+    /// Gets the state's player
     /// </summary>
     /// <returns>A sprite indicating the state player</returns>
-    member this.player =
+    member this.player : sprite =
         match this with
-        | Game(pg = p) -> p
+        | Game(pg = p) -> p.Value
         | _ -> raise PropertyNotImplementedException
 
     /// <summary>
-    /// Mze Data structure in the state
+    /// Gets the state's maze data structure
     /// </summary>
     /// <returns>Maze data structure of the state</returns>
-    member this.maze =
+    member this.maze : Maze =
         match this with
         | Game(maze = m) -> m.Value
         | _ -> raise PropertyNotImplementedException
 
     /// <summary>
-    /// State menu items
+    /// Gets the state's menu voices
     /// </summary>
     /// <returns>A string list representing menu items</returns>
-    member this.text =
+    member this.text : string list =
         match this with
         | Menu(voices = t) | Text(voices = t) -> t
         | _ -> raise PropertyNotImplementedException
 
     /// <summary>
     /// Window size
+    /// Gets the maze's game size for Game or the window's size for Menu and Text
     /// </summary>
-    /// <returns>A couple of int representing the window size</returns>
-    member this.size =
+    /// <returns>A couple of int representing the size</returns>
+    member this.size : int*int =
         match this with
         | Game(size = (x,y)) -> x,y
         | Menu(size = (x,y)) -> x,y
         | Text(size = (x,y)) -> x,y
 
     /// <summary>
-    /// Text position
+    /// Gets the the state's text position
     /// </summary>
     /// <returns>A couple of int representing the text position</returns>
-    member this.position =
+    member this.position : int*int =
         match this with
         | Text(pos = (x,y)) -> x,y
         | _ -> raise PropertyNotImplementedException
 
     /// <summary>
-    /// Execute the action assigned to state
+    /// Executes the state's assigned action
     /// </summary>
     /// <param name="k">Pressed key</param>
     /// <param name="r">Write only raster used for screen writing</param>
     /// <param name="s">Menu items list</param>
     /// <returns>A new state, that comes from the changes on the actual state</returns>
-    member this.move (k,?r:wronly_raster,?s:string list) =
+    member this.move (k,?r:wronly_raster,?s:string list) : State =
         match this with
         | Game(move = n) -> n this k
         | Menu(move = n;size = s) -> n this k r.Value this.text s
@@ -121,15 +122,15 @@ type State =
 
 
 /// <summary>
-/// Check if the movement is allowed
+/// Checks if the movement is allowed
 /// </summary>
 /// <param name="st">Current state</param>
 /// <param name="dx">Horizontal displacement</param>
 /// <param name="dy">Vertical displacement</param>
 /// <returns>A couple of float indicating the action to execute</returns>
-let check_bounds (st:State) (dx: float, dy: float)=
-    let vertical = int (st.player.Value.x + dx)
-    let horizontal = int (st.player.Value.y + dy)
+let check_bounds (st:State) (dx: float, dy: float) : float*float =
+    let vertical = int (st.player.x + dx)
+    let horizontal = int (st.player.y + dy)
     let w,h = st.size
 
     if vertical >= 0 && vertical <= w && horizontal >= 0 && horizontal <= h then 
@@ -139,22 +140,38 @@ let check_bounds (st:State) (dx: float, dy: float)=
         0.,0.
 
 /// <summary>
-/// Write in the game console
+/// Writes the state's menu voices
 /// </summary>
 /// <param name="s">The string to write</param>
-/// <param name="index">Idex of item in menu</param>
+/// <param name="index">The index of the item in the menu</param>
 /// <param name="wr">Write only raster used for screen writing</param>
 /// <param name="size">Game window size</param>
 let drawMenuText (s: string) (index: int) (color:ConsoleColor) (wr: wronly_raster) (size: int*int) : unit =
     let x,y = size
     wr.draw_text((sprintf "%s\n\n" s),x/2-3,(y/2 + index),color)
 
-
+/// <summary>
+/// Writes the state's text message
+/// </summary>
+/// <param name="s">The string to write</param>
+/// <param name="index">The index of the item in the menu</param>
+/// <param name="wr">Write only raster used for screen writing</param>
+/// <param name="size">Game window size</param>
 let drawText (s: string) (index: int) (color:ConsoleColor) (wr: wronly_raster) (size: int*int) (pos: int*int) : unit =
     let x,y = pos
     wr.draw_text((sprintf "%s\n\n" s),x,y,color)
 
 
+/// <summary>
+/// Draws all menu voices of a given state
+/// </summary>
+/// <param name="st">The given state</param>
+/// <param name="key">The pressed key</param>
+/// <param name="wr">Write only raster used for screen writing</param>
+/// <param name="ls">the list of menu voices to be written</param>
+/// <param name="size">Game window size</param>
+/// <param name="pos">The position that marks be beginning of the word</param>
+/// <returns>A new state with the modified index</returns>
 let rec showText (st: State) (key: ConsoleKeyInfo)  (wr: wronly_raster) (ls: string list) (size: int*int) (pos: int*int) : State =
     let idx = ls.Length - 1
     let rec aux ls i idx pos=
@@ -168,16 +185,16 @@ let rec showText (st: State) (key: ConsoleKeyInfo)  (wr: wronly_raster) (ls: str
                 drawText s i ConsoleColor.White wr size pos
                 aux xs (i+1) idx (x,y+2)
 
-    aux ls 0 idx st.position
+    aux ls 0 idx pos
     Text(st.name,None,showText,st.text,st.size,st.position,idx)
 
 /// <summary>
-/// Move the sprite according to the key pressed
+/// Moves the sprite according to the key pressed
 /// </summary>
 /// <param name="st">Current state</param>
 /// <param name="key">Key pressed</param>
 /// <returns>A new state, that comes from the changes on the actual state</returns>
-let movePlayer (st: State) (key: ConsoleKeyInfo): State =
+let movePlayer (st: State) (key: ConsoleKeyInfo) : State =
     let dx,dy =
         match key.Key with
         | ConsoleKey.W | ConsoleKey.UpArrow -> 0.,-1.
@@ -187,10 +204,16 @@ let movePlayer (st: State) (key: ConsoleKeyInfo): State =
         | _ -> 0.,0.
 
     let x,y = check_bounds st (dx,dy)
-    st.player.Value.move_by (x,y)
+    st.player.move_by (x,y)
     st
 
-let drawSubRegion (st: State) =
+/// <summary>
+/// Draws a portion of the screen based on the visibility range
+/// </summary>
+/// <param name="st">Current state</param>
+/// <param name="key">Key pressed</param>
+/// <returns>A new state, that comes from the changes on the actual state</returns>
+let drawSubRegion (st: State) : State =
     let maze = st.maze
     let background = maze.toSprite (1,st.visibility)
     match st with
@@ -198,7 +221,14 @@ let drawSubRegion (st: State) =
         Game(n,pg,Some background,mv,maze,size,v)
     | _ -> failwith ""
 
-let rec hardModeMove (st: State) (key: ConsoleKeyInfo): State =
+
+/// <summary>
+/// Moves the sprite according to the key pressed and draws the corresponding subregion of the maze
+/// </summary>
+/// <param name="st">Current state</param>
+/// <param name="key">Key pressed</param>
+/// <returns>A new state, that comes from the changes on the actual state</returns>
+let rec hardModeMove (st: State) (key: ConsoleKeyInfo) : State =
     let dx,dy =
         match key.Key with
         | ConsoleKey.W | ConsoleKey.UpArrow -> 0.,-1.
@@ -208,8 +238,8 @@ let rec hardModeMove (st: State) (key: ConsoleKeyInfo): State =
         | _ -> 0.,0.
 
     let x,y = check_bounds st (dx,dy)
-    st.player.Value.move_by (x,y)
-    let px,py = int (ceil st.player.Value.x), int (ceil st.player.Value.y)
+    st.player.move_by (x,y)
+    let px,py = int (ceil st.player.x), int (ceil st.player.y)
     st.maze.player <- Cell(px,py,st.maze.width,st.maze.height)
     drawSubRegion st
 
@@ -224,21 +254,26 @@ let generateMaze (st:State) (key: ConsoleKeyInfo) : State =
     let w,h = st.size
     let maze = new Maze(w,h)
     maze.generate ()
-    let player = Cell(int st.player.Value.x, int st.player.Value.y,maze.width,maze.height)
+    let player = Cell(int st.player.x, int st.player.y,maze.width,maze.height)
     maze.player <- player
     let background = maze.toSprite 0
-    let newState = Game("play",st.player,Some background,movePlayer,Some maze,(w,h),st.visibility)
+    let newState = Game("play",Some st.player,Some background,movePlayer,Some maze,(w,h),st.visibility)
     movePlayer newState key
 
-
+/// <summary>
+/// Generates a new maze with limited visibility
+/// </summary>
+/// <param name="st">Current state</param>
+/// <param name="key">Key pressed</param>
+/// <returns>A new state, that comes from the changes on the actual state</returns>
 let generateHardcoreMaze (st:State) (key: ConsoleKeyInfo) : State = 
     let w,h = st.size
     let maze = new Maze(w,h)
     maze.generate ()
-    let player = Cell(int st.player.Value.x, int st.player.Value.y,maze.width,maze.height)
+    let player = Cell(int st.player.x, int st.player.y,maze.width,maze.height)
     maze.player <- player
     let background = maze.toSprite (1,st.visibility)
-    let newState = Game("play",st.player,Some background,hardModeMove,Some maze,(w,h),st.visibility)
+    let newState = Game("play",Some st.player,Some background,hardModeMove,Some maze,(w,h),st.visibility)
     hardModeMove newState key
 
 /// <summary>
@@ -253,12 +288,12 @@ let solveMaze (st: State) (key: ConsoleKeyInfo) : State =
     maze.generate ()
     solveRecursive maze |> ignore
     let background = Some (maze.toSprite(0))
-    let newState = Game(st.name,st.player,background,movePlayer,Some maze,st.size,st.visibility)
+    let newState = Game(st.name,Some st.player,background,movePlayer,Some maze,st.size,st.visibility)
     movePlayer newState key
 
 
 /// <summary>
-/// Write in game console
+/// Writes in the game console
 /// </summary>
 /// <param name="s"String to write</param>
 /// <param name="index">Index indicating menu item</param>
@@ -286,7 +321,7 @@ let rec showMenu (st: State) (key: ConsoleKeyInfo)  (wr: wronly_raster) (ls: str
     Menu(st.name,None,showMenu,st.text,idx,size)
 
 /// <summary>
-/// Show the current maze solution
+/// Shows the current maze solution
 /// </summary>
 /// <param name="st">Current state</param>
 /// <param name="key">Key pressed</param>
@@ -294,6 +329,6 @@ let rec showMenu (st: State) (key: ConsoleKeyInfo)  (wr: wronly_raster) (ls: str
 let showSolution (st: State) (key: ConsoleKeyInfo) : State =
     let solved = solveRecursive st.maze
     let background = Some (solved.toSprite(0))
-    let newState = Game(st.name,st.player,background,movePlayer,Some solved,st.size,st.visibility)
+    let newState = Game(st.name,Some st.player,background,movePlayer,Some solved,st.size,st.visibility)
     movePlayer newState key
 

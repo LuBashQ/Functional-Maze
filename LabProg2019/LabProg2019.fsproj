@@ -69,10 +69,11 @@
     <Compile Include="Globals.fs" />
     <Compile Include="Gfx.fs" />
     <Compile Include="Engine.fs" />
+    <Compile Include="Cell.fs" />
     <Compile Include="Maze.fs" />
     <Compile Include="TreeMaze.fs" />
     <Compile Include="Actions.fs" />
-    <Compile Include="Scene.fs" />
+    <Compile Include="StateManager.fs" />
     <Compile Include="Test.fs" />
     <Compile Include="Game.fs" />
     <Compile Include="Main.fs" />

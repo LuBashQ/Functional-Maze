@@ -5,85 +5,40 @@
 *)
 
 module LabProg2019.Maze
-
 open System.Collections.Generic
 open Gfx
+open Cell
 exception InvalidInsertionException 
-
-
-/// <summary>
-/// Type Cell
-/// </summary>
-/// <param name="_x">Cell abscissa</param>
-/// <param name="_y">Cell ordinate</param>
-/// <param name="_mazeW">Maze width</param>
-/// <param name="_mazeH">Maze height</param>
-type Cell (_x: int, _y: int, _mazeW: int, _mazeH: int) =
-    member val x = _x with get,set
-    member val y = _y with get,set
-    member val mazeW = _mazeW
-    member val mazeH = _mazeH
-    member val isVisited = false with get,set
-    member val isExit = false with get,set
-    member val isPath = false with get,set
-    member val isDeadEnd = false with get,set
-
-    /// <summary>
-    /// Check and return the possible cell neighbors
-    /// </summary>
-    /// <param name="maze">Cell matrix</param>
-    /// <returns>A Cell list containing cell neighbors</returns>
-    member this.neighbors (maze: Cell[,]) =
-        [   
-            if checkMatrixBounds (this.x - 2, this.y,this.mazeW,this.mazeH) then maze.[this.x - 2, this.y]
-            if checkMatrixBounds (this.x + 2, this.y,this.mazeW,this.mazeH) then maze.[this.x + 2, this.y]
-            if checkMatrixBounds (this.x, this.y - 2,this.mazeW,this.mazeH) then maze.[this.x, this.y - 2]
-            if checkMatrixBounds (this.x, this.y + 2,this.mazeW,this.mazeH) then maze.[this.x, this.y + 2]
-        ] |> List.filter (fun cell -> not cell.isVisited)
-    
-    /// <summary>
-    /// Check and return the possible cell children (that are the non-wall near cells)
-    /// </summary>
-    /// <param name="maze">Cell matrix</param>
-    /// <param name="parent">Parent cell</param>
-    /// <returns>A Cell list containing cell son</returns>
-    member this.children (maze: Cell[,], parent: Cell) =
-        [   
-            if checkMatrixBounds (this.x - 1, this.y,this.mazeW,this.mazeH) then maze.[this.x - 1, this.y]
-            if checkMatrixBounds (this.x + 1, this.y,this.mazeW,this.mazeH) then maze.[this.x + 1, this.y]
-            if checkMatrixBounds (this.x, this.y - 1,this.mazeW,this.mazeH) then maze.[this.x, this.y - 1]
-            if checkMatrixBounds (this.x, this.y + 1,this.mazeW,this.mazeH) then maze.[this.x, this.y + 1]
-        ] |> List.filter (fun cell -> cell.isVisited && cell <> parent && not cell.isDeadEnd)
 
 
 /// <summary>
 /// Type Maze
 /// </summary>
-/// <param name="width">Maze with</param>
+/// <param name="width">Maze width</param>
 /// <param name="heigth">Maze height</param>
-type Maze (width, height) =
+type Maze (_width: int, _height: int) =
     
-    let rnd = rnd_int 1 (width - 1)
+    let rnd = rnd_int 1 (_width - 1)
     
-    ///<summary>Return a valid column for the creation of the exit</summary>
+    ///<summary>Returns a valid column for the creation of the exit</summary>
     let yAxisPosition = if  rnd % 2 <> 0 then rnd else rnd - 1
 
-    member val width = width with get
-    member val height = height with get
-    member val maze = Array2D.init width height (fun x y -> Cell (x,y,width,height)) with get,set
-    member val pixelMap = Array2D.init width height (fun x y -> pixel.empty)
+    member val width = _width with get
+    member val height = _height with get
+    member val maze = Array2D.init _width _height (fun x y -> Cell (x,y,_width,_height)) with get,set
+    member val pixelMap = Array2D.init _width _height (fun x y -> pixel.empty)
     member this.start = this.maze.[1,1]
-    member this.finish = this.maze.[width - 1,yAxisPosition]
-    member val player = Cell(1,1,width,height) with get,set
+    member this.finish = this.maze.[_width - 1,yAxisPosition]
+    member val player = Cell(1,1,_width,_height) with get,set
 
 
     /// <summary>
-    /// Convert a cell matrix into array of CharInfo
+    /// Converts a cell matrix into array of CharInfo
     /// </summary>
     /// <returns>An array of CharInfo</returns>
-    member this.convertToPixel () =
-        for x = 0 to (width-1) do
-            for y = 0 to (height-1) do
+    member this.convertToPixel () : External.CharInfo[] =
+        for x = 0 to (_width-1) do
+            for y = 0 to (_height-1) do
                 if this.maze.[x,y].isVisited then
                     if this.maze.[x,y].isPath then 
                         this.pixelMap.SetValue (pixel.create('\219',Color.DarkMagenta),x,y)
@@ -92,9 +47,13 @@ type Maze (width, height) =
         
         toArray this.pixelMap
     
-
-    member this.isInArea (diameter:int) =
-        let radius = diameter/2
+    /// <summary>
+    /// Creates the area of visibility during an hardore game
+    /// </summary>
+    /// <param name="visibility">The area of visibility</param>
+    /// <returns>A tuple representing the directly visible area, the slighty and almost completely out of sight cells</returns>
+    member private this.getAreas (visibility:int) : (Cell list * Cell list * Cell list) =
+        let radius = visibility/2
         let x,y = this.player.x,this.player.y
         
         let area = [
@@ -118,22 +77,25 @@ type Maze (width, height) =
                         yield this.maze.[y+j,x+i]
         ]
 
-
-
         let rec aux ls acc =
             match ls with
             | [] -> acc
             | x::xs -> aux xs (List.filter ((<>) x) acc)
         
-        let a = aux area grayArea
-
-        area,a,aux a darkArea
+        let grey = aux area grayArea
+        let dark = aux grey darkArea
         
+        area,grey,dark
 
-    member this.convertAreaToPixel (diameter:int) =
-        let area,grayArea,darkArea = this.isInArea diameter
-        for x = 0 to (width-1) do
-            for y = 0 to (height-1) do
+    /// <summary>
+    /// Converts a cell matrix into array of CharInfo, based on a certain visibility
+    /// </summary>
+    /// <param name="visibility">The area of visibility</param>
+    /// <returns>An array of CharInfo</returns>
+    member this.convertAreaToPixel (visibility: int) : External.CharInfo[] =
+        let area,grayArea,darkArea = this.getAreas visibility
+        for x = 0 to (_width-1) do
+            for y = 0 to (_height-1) do
                 if List.exists ((=) this.maze.[x,y]) area then
                     if this.maze.[x,y].isVisited then
                         if this.maze.[x,y].isPath then 
@@ -156,8 +118,6 @@ type Maze (width, height) =
                 else
                         this.pixelMap.SetValue (pixel.create('\219',Color.Black),x,y)
                 
-                
-        
         toArray this.pixelMap
 
     /// <summary>
@@ -167,7 +127,7 @@ type Maze (width, height) =
     /// <exception cref="InvalidInsertionException">
     /// It is raised when current and next cell has neither abscissa nor ordinate in common
     /// </exception>
-    member private this.initialize () =                                                 
+    member private this.initialize () : unit =                                                 
         let stack = new Stack<Cell>()
         stack.Push(this.start)
         while stack.Count > 0 do
@@ -194,21 +154,21 @@ type Maze (width, height) =
 
 
     /// <summary>
-    /// Convert a pixel array into a sprite
+    /// Converts a pixel array into a sprite
     /// </summary>
+    /// <param name="t">The index of the operation</param>
+    /// <param name="visibility">The visibility of the game</param>
     /// <returns>A sprite containing the maze</returns>
-    /// <seealso cref="this.convertToPixel"/>
-    member this.toSprite (t:int,?diameter:int) =
+    member this.toSprite (t: int,?visibility: int) : sprite =
         match t with
-        | 0 -> sprite(image(width,height,this.convertToPixel ()),0,0,0)
-        | _ -> sprite(image(width,height,this.convertAreaToPixel diameter.Value),0,0,0)
+        | 0 -> sprite(image(_width,_height,this.convertToPixel ()),0,0,0)
+        | _ -> sprite(image(_width,_height,this.convertAreaToPixel visibility.Value),0,0,0)
 
     
     /// <summary>
-    /// Generete and set maze entry and exit
+    /// Generetes and set maze entry and exit
     /// </summary>
-    /// <seealso cref="this.initialize"/>
-    member this.generate () =
+    member this.generate () : unit =
         this.initialize ()
         this.maze.[this.finish.x,this.finish.y].isExit <- true
         this.maze.[this.finish.x,this.finish.y].isVisited <- true

@@ -80,14 +80,34 @@ let stopwatch msg f =
     Log.debug "%s: %O ms" msg e.TotalMilliseconds
     e
 
-let checkMatrixBounds (x: int, y: int, W: int, H: int) =
+/// <summary>
+/// Checks if the position given is inside a matrix or not
+/// </summary>
+/// <param name="x">x value</param>
+/// <param name="y">y value</param>
+/// <param name="W">Width of the matrix</param>
+/// <param name="H">Height of the matrix</param>
+/// <returns>True if x,y is inside the matrix, false otherwise</returns>
+let checkMatrixBounds (x: int, y: int, W: int, H: int) : bool =
     x >= 0 && x < W && y >= 0 && y < H
 
+/// <summary>
+/// Removes an item from a list
+/// </summary>
+/// <param name="spr">The item to be removed</param>
+/// <param name="list">The list</param>
+/// <returns>A new list containing all the elements but the removed one</returns>
 let rec removeFromList (spr: 'a) (list: 'a list) = 
     match list with
     | [] -> []
     | x::xs -> if x = spr then removeFromList spr xs else x::removeFromList spr xs
 
+
+/// <summary>
+/// Converts a matrix into an array
+/// </summary>
+/// <param name="grid">The matrix</param>
+/// <returns>An array which contains all the elements of the matrix</returns>
 let toArray (grid:'T[,]) = grid |> Seq.cast<'T> |> Seq.toArray
 
 

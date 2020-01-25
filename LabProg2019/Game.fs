@@ -1,9 +1,14 @@
-﻿module LabProg2019.Game
+﻿(*
+* LabProg2019 - Progetto di Programmazione a.a. 2019-20
+* Game.fs: game entry point
+* (C) 2019 Alvise Spano' @ Universita' Ca' Foscari di Venezia
+*)
 
-open Maze
+module LabProg2019.Game
+
 open Gfx
 open Engine
-open Scene
+open StateManager
 open Actions
 
 let main () =     
@@ -13,7 +18,7 @@ let main () =
     let engine = new engine (W,H)
     let player = sprite(image.rectangle(1,1,pixel.filled Color.Red),1,1,1)
 
-    // Game states generalization
+    // Game states definition
     let maze = Game("normal",Some player,None,generateMaze,None,(W,H),0)
     let hardcoreMaze = Game("hardcore",Some player,None,generateHardcoreMaze,None,(W,H),5)
     let solved = Game("solved",Some player,None,solveMaze,None,(W,H),0)
@@ -25,7 +30,7 @@ let main () =
     "USE 'Q' or QUIT to quit";"NORMAL to play a standard game";"HARDCORE to have a challenge";"OPTIONS to change settings";"MENU"],(W,H),(W/5+2,15),0)
     let win = Text("win",None,showText,["VICTORY!";"MENU"],(W,H),(W/2-5,H/2-2),0)
 
-    let sceneManager = SceneManager([menu;maze;solved;options;size;help;win;hardcoreMaze;visibility],engine)
+    let sceneManager = StateManager([menu;maze;solved;options;size;help;win;hardcoreMaze;visibility],engine)
 
     // Game execution
     engine.loop_on_key <| sceneManager.execute engine

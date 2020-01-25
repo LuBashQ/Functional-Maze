@@ -65,17 +65,8 @@ type engine (w : int, h : int, ?fps_cap : int, ?flip_queue) =
             sprites <- List.sortBy (fun spr -> spr.z) (spr :: sprites)  // sprites are always sorted in ascending order by z
             List.length sprites
         Log.msg "registered sprite #%d: x=%g y=%g z=%d width=%d height=%d" len spr.x spr.y spr.z spr.width spr.height
-    
-
-
-    member __.remove_sprite (spr: sprite) =
-        let len = lock sprites <| fun () ->
-            sprites <- List.sortBy (fun spr -> spr.z) (removeFromList spr sprites)
-            List.length sprites
-        Log.msg "removed sprite #%d: x=%g y=%g z=%d width=%d height=%d" len spr.x spr.y spr.z spr.width spr.height
 
     member this.removeAll () = sprites <- []
-    member this.remove_and_unregister_sprite (sprite) = this.remove_sprite sprite
     member this.create_and_register_sprite (img, x, y, z) = let r = new sprite (img, x, y, z) in this.register_sprite r; r
     member this.create_and_register_sprite (sprite) = this.register_sprite sprite; sprite
     member this.create_and_register_sprite (w, h, x, y, z) = this.create_and_register_sprite (new image (w, h), x, y, z)
@@ -99,12 +90,10 @@ type engine (w : int, h : int, ?fps_cap : int, ?flip_queue) =
         { data with frame_cnt = data.frame_cnt + 1; elapsed = ts }
     
 
-    //few mods down here to make menu work
     member this.loop_on_key update =
         Log.msg "entering engine on-key loop..."
         let mutable data = { frame_cnt = 0; elapsed = new TimeSpan (); now = DateTime.Now }
-        //data <- this.shoot (fun _ -> ()) data
-        data <- this.shoot (update (Some (ConsoleKeyInfo()))) data
+        data <- this.shoot (update None) data //Hard coded frame in order to activate on screen writing
         while not isEnd do
             let k = Console.ReadKey true
             Log.debug "engine: key pressed: %c" k.KeyChar

@@ -57,6 +57,31 @@
  Logger type.
 </summary>
 </member>
+<member name="M:LabProg2019.Globals.toArray``1(``0[0:, 0:])">
+ <summary>
+ Converts a matrix into an array
+ </summary>
+ <param name="grid">The matrix</param>
+ <returns>An array which contains all the elements of the matrix</returns>
+</member>
+<member name="M:LabProg2019.Globals.removeFromList``1(``0,Microsoft.FSharp.Collections.FSharpList{``0})">
+ <summary>
+ Removes an item from a list
+ </summary>
+ <param name="spr">The item to be removed</param>
+ <param name="list">The list</param>
+ <returns>A new list containing all the elements but the removed one</returns>
+</member>
+<member name="M:LabProg2019.Globals.checkMatrixBounds(System.Int32,System.Int32,System.Int32,System.Int32)">
+ <summary>
+ Checks if the position given is inside a matrix or not
+ </summary>
+ <param name="x">x value</param>
+ <param name="y">y value</param>
+ <param name="W">Width of the matrix</param>
+ <param name="H">Height of the matrix</param>
+ <returns>True if x,y is inside the matrix, false otherwise</returns>
+</member>
 <member name="M:LabProg2019.Globals.rnd_color">
 <summary>
  Generate a random ConsoleColor among the available system palette.
@@ -104,15 +129,40 @@
  Calculates the intersection between the two given rectangles.
 </summary>
 </member>
+<member name="M:LabProg2019.Cell.Cell.neighbors(LabProg2019.Cell.Cell[0:, 0:])">
+ <summary>
+ Checks and return the possible cell neighbours
+ </summary>
+ <param name="maze">Cell matrix</param>
+ <returns>A Cell list containing cell neighbours</returns>
+</member>
+<member name="M:LabProg2019.Cell.Cell.children(LabProg2019.Cell.Cell[0:, 0:],LabProg2019.Cell.Cell)">
+ <summary>
+ Checks and return the possible cell children (non-wall neighbouring cells)
+ </summary>
+ <param name="maze">Cell matrix</param>
+ <param name="parent">Parent cell</param>
+ <returns>A Cell list containing the cell's sons</returns>
+</member>
+<member name="T:LabProg2019.Cell.Cell">
+ <summary>
+ Type Cell
+ </summary>
+ <param name="_x">Cell x-coordinate</param>
+ <param name="_y">Cell y-coordinate</param>
+ <param name="_mazeW">Maze width</param>
+ <param name="_mazeH">Maze height</param>
+</member>
 <member name="F:LabProg2019.Maze.Maze.yAxisPosition">
-<summary>Return a valid column for the creation of the exit</summary>
+<summary>Returns a valid column for the creation of the exit</summary>
 </member>
 <member name="M:LabProg2019.Maze.Maze.toSprite(System.Int32,Microsoft.FSharp.Core.FSharpOption{System.Int32})">
  <summary>
- Convert a pixel array into a sprite
+ Converts a pixel array into a sprite
  </summary>
+ <param name="t">The index of the operation</param>
+ <param name="visibility">The visibility of the game</param>
  <returns>A sprite containing the maze</returns>
- <seealso cref="this.convertToPixel"/>
 </member>
 <member name="M:LabProg2019.Maze.Maze.initialize">
  <summary>
@@ -123,48 +173,37 @@
  It is raised when current and next cell has neither abscissa nor ordinate in common
  </exception>
 </member>
+<member name="M:LabProg2019.Maze.Maze.getAreas(System.Int32)">
+ <summary>
+ Creates the area of visibility during an hardore game
+ </summary>
+ <param name="visibility">The area of visibility</param>
+ <returns>A tuple representing the directly visible area, the slighty and almost completely out of sight cells</returns>
+</member>
 <member name="M:LabProg2019.Maze.Maze.generate">
  <summary>
- Generete and set maze entry and exit
+ Generetes and set maze entry and exit
  </summary>
- <seealso cref="this.initialize"/>
 </member>
 <member name="M:LabProg2019.Maze.Maze.convertToPixel">
  <summary>
- Convert a cell matrix into array of CharInfo
+ Converts a cell matrix into array of CharInfo
  </summary>
+ <returns>An array of CharInfo</returns>
+</member>
+<member name="M:LabProg2019.Maze.Maze.convertAreaToPixel(System.Int32)">
+ <summary>
+ Converts a cell matrix into array of CharInfo, based on a certain visibility
+ </summary>
+ <param name="visibility">The area of visibility</param>
  <returns>An array of CharInfo</returns>
 </member>
 <member name="T:LabProg2019.Maze.Maze">
  <summary>
  Type Maze
  </summary>
- <param name="width">Maze with</param>
+ <param name="width">Maze width</param>
  <param name="heigth">Maze height</param>
-</member>
-<member name="M:LabProg2019.Maze.Cell.neighbors(LabProg2019.Maze.Cell[0:, 0:])">
- <summary>
- Check and return the possible cell neighbors
- </summary>
- <param name="maze">Cell matrix</param>
- <returns>A Cell list containing cell neighbors</returns>
-</member>
-<member name="M:LabProg2019.Maze.Cell.children(LabProg2019.Maze.Cell[0:, 0:],LabProg2019.Maze.Cell)">
- <summary>
- Check and return the possible cell children (that are the non-wall near cells)
- </summary>
- <param name="maze">Cell matrix</param>
- <param name="parent">Parent cell</param>
- <returns>A Cell list containing cell son</returns>
-</member>
-<member name="T:LabProg2019.Maze.Cell">
- <summary>
- Type Cell
- </summary>
- <param name="_x">Cell abscissa</param>
- <param name="_y">Cell ordinate</param>
- <param name="_mazeW">Maze width</param>
- <param name="_mazeH">Maze height</param>
 </member>
 <member name="T:LabProg2019.TreeMaze.Tree">
  <summary>
@@ -183,7 +222,7 @@
 </member>
 <member name="M:LabProg2019.TreeMaze.findHierarchy(LabProg2019.Maze.Maze,System.Collections.Generic.Queue{LabProg2019.TreeMaze.Tree})">
  <summary>
- In-depth searching algorithm of n-ary tree, used to generate the hierarchy parent-child
+ Depth first searching algorithm on an n-ary tree, used to generate the hierarchy parent-child
  </summary>
  <param name="maze">Maze data structure</param>
  <param name="queue">A tail</param>
@@ -191,14 +230,14 @@
 </member>
 <member name="M:LabProg2019.TreeMaze.solveIterative(LabProg2019.Maze.Maze)">
  <summary>
- Iterative solving algotihm based on n-ary tree
+ Iterative solving algotihm based on an n-ary tree data structure and breath first search
  </summary>
  <param name="maze">Maze data structure</param>
  <returns>Maze modified data structure</returns>
 </member>
 <member name="M:LabProg2019.TreeMaze.buildPath(Microsoft.FSharp.Core.FSharpOption{LabProg2019.TreeMaze.Tree},LabProg2019.Maze.Maze)">
  <summary>
- Modify the matrix cells to modify the path
+ Modifies the matrix cells to mark the path
  </summary>
  <param name="root">Tree root</param>
  <param name="maze">Maze data structure</param>
@@ -206,21 +245,21 @@
 </member>
 <member name="M:LabProg2019.TreeMaze.retrievePath(Microsoft.FSharp.Core.FSharpOption{LabProg2019.TreeMaze.Tree})">
  <summary>
- Get recursively all parent cell of the maze exit leaf
+ Gets recursively all parent cell of the maze exit leaf
  </summary>
  <param name="leaf">Tree leaf</param>
- <returns>Cell list</returns>
+ <returns>The solution's path</returns>
 </member>
-<member name="M:LabProg2019.TreeMaze.getChildren(LabProg2019.TreeMaze.Tree,LabProg2019.Maze.Cell[0:, 0:])">
+<member name="M:LabProg2019.TreeMaze.getChildren(LabProg2019.TreeMaze.Tree,LabProg2019.Cell.Cell[0:, 0:])">
  <summary>
- Get all children of a tree node
+ Gets all children of a tree node
  </summary>
  <param name="node">Tree node</param>
  <param name="maze">Matrix that identify the maze</param>
 </member>
 <member name="M:LabProg2019.Actions.State.move(System.ConsoleKeyInfo,Microsoft.FSharp.Core.FSharpOption{LabProg2019.Gfx.wronly_raster},Microsoft.FSharp.Core.FSharpOption{Microsoft.FSharp.Collections.FSharpList{System.String}})">
  <summary>
- Execute the action assigned to state
+ Executes the state's assigned action
  </summary>
  <param name="k">Pressed key</param>
  <param name="r">Write only raster used for screen writing</param>
@@ -229,49 +268,50 @@
 </member>
 <member name="P:LabProg2019.Actions.State.text">
  <summary>
- State menu items
+ Gets the state's menu voices
  </summary>
  <returns>A string list representing menu items</returns>
 </member>
 <member name="P:LabProg2019.Actions.State.size">
  <summary>
  Window size
+ Gets the maze's game size for Game or the window's size for Menu and Text
  </summary>
- <returns>A couple of int representing the window size</returns>
+ <returns>A couple of int representing the size</returns>
 </member>
 <member name="P:LabProg2019.Actions.State.position">
  <summary>
- Text position
+ Gets the the state's text position
  </summary>
  <returns>A couple of int representing the text position</returns>
 </member>
 <member name="P:LabProg2019.Actions.State.player">
  <summary>
-State palyer
+ Gets the state's player
  </summary>
  <returns>A sprite indicating the state player</returns>
 </member>
 <member name="P:LabProg2019.Actions.State.name">
  <summary>
- State name
+ Gets the state's name
  </summary>
  <returns>A string with state name</returns>
 </member>
 <member name="P:LabProg2019.Actions.State.maze">
  <summary>
- Mze Data structure in the state
+ Gets the state's maze data structure
  </summary>
  <returns>Maze data structure of the state</returns>
 </member>
 <member name="P:LabProg2019.Actions.State.background">
  <summary>
- Background state
+ Gets the state's background
  </summary>
  <returns>A sprite indicating background state</returns>
 </member>
 <member name="P:LabProg2019.Actions.State.active">
  <summary>
- The active manu item
+ Gets the state's active menu voice
  </summary>
  <returns>A int indicating the menu voice</returns>
 </member>
@@ -290,7 +330,7 @@ State palyer
 </member>
 <member name="M:LabProg2019.Actions.showSolution(LabProg2019.Actions.State,System.ConsoleKeyInfo)">
  <summary>
- Show the current maze solution
+ Shows the current maze solution
  </summary>
  <param name="st">Current state</param>
  <param name="key">Key pressed</param>
@@ -298,7 +338,7 @@ State palyer
 </member>
 <member name="M:LabProg2019.Actions.showMenu(LabProg2019.Actions.State,System.ConsoleKeyInfo,LabProg2019.Gfx.wronly_raster,Microsoft.FSharp.Collections.FSharpList{System.String},System.Int32,System.Int32)">
  <summary>
- Write in game console
+ Writes in the game console
  </summary>
  <param name="s"String to write</param>
  <param name="index">Index indicating menu item</param>
@@ -314,6 +354,14 @@ State palyer
  <param name="key">Key pressed</param>
  <returns>A new state, that comes from the changes on the actual state</returns>
 </member>
+<member name="M:LabProg2019.Actions.generateHardcoreMaze(LabProg2019.Actions.State,System.ConsoleKeyInfo)">
+ <summary>
+ Generates a new maze with limited visibility
+ </summary>
+ <param name="st">Current state</param>
+ <param name="key">Key pressed</param>
+ <returns>A new state, that comes from the changes on the actual state</returns>
+</member>
 <member name="M:LabProg2019.Actions.generateMaze(LabProg2019.Actions.State,System.ConsoleKeyInfo)">
  <summary>
  Generates a new maze
@@ -322,120 +370,157 @@ State palyer
  <param name="key">Key pressed</param>
  <returns>A new state, that comes from the changes on the actual state</returns>
 </member>
-<member name="M:LabProg2019.Actions.movePlayer(LabProg2019.Actions.State,System.ConsoleKeyInfo)">
+<member name="M:LabProg2019.Actions.hardModeMove(LabProg2019.Actions.State,System.ConsoleKeyInfo)">
  <summary>
- Move the sprite according to the key pressed
+ Moves the sprite according to the key pressed and draws the corresponding subregion of the maze
  </summary>
  <param name="st">Current state</param>
  <param name="key">Key pressed</param>
  <returns>A new state, that comes from the changes on the actual state</returns>
 </member>
-<member name="M:LabProg2019.Actions.drawMenuText(System.String,System.Int32,System.ConsoleColor,LabProg2019.Gfx.wronly_raster,System.Int32,System.Int32)">
+<member name="M:LabProg2019.Actions.drawSubRegion(LabProg2019.Actions.State)">
  <summary>
- Write in the game console
+ Draws a portion of the screen based on the visibility range
+ </summary>
+ <param name="st">Current state</param>
+ <param name="key">Key pressed</param>
+ <returns>A new state, that comes from the changes on the actual state</returns>
+</member>
+<member name="M:LabProg2019.Actions.movePlayer(LabProg2019.Actions.State,System.ConsoleKeyInfo)">
+ <summary>
+ Moves the sprite according to the key pressed
+ </summary>
+ <param name="st">Current state</param>
+ <param name="key">Key pressed</param>
+ <returns>A new state, that comes from the changes on the actual state</returns>
+</member>
+<member name="M:LabProg2019.Actions.showText(LabProg2019.Actions.State,System.ConsoleKeyInfo,LabProg2019.Gfx.wronly_raster,Microsoft.FSharp.Collections.FSharpList{System.String},System.Int32,System.Int32,System.Int32,System.Int32)">
+ <summary>
+ Draws all menu voices of a given state
+ </summary>
+ <param name="st">The given state</param>
+ <param name="key">The pressed key</param>
+ <param name="wr">Write only raster used for screen writing</param>
+ <param name="ls">the list of menu voices to be written</param>
+ <param name="size">Game window size</param>
+ <param name="pos">The position that marks be beginning of the word</param>
+ <returns>A new state with the modified index</returns>
+</member>
+<member name="M:LabProg2019.Actions.drawText(System.String,System.Int32,System.ConsoleColor,LabProg2019.Gfx.wronly_raster,System.Int32,System.Int32,System.Int32,System.Int32)">
+ <summary>
+ Writes the state's text message
  </summary>
  <param name="s">The string to write</param>
- <param name="index">Idex of item in menu</param>
+ <param name="index">The index of the item in the menu</param>
+ <param name="wr">Write only raster used for screen writing</param>
+ <param name="size">Game window size</param>
+</member>
+<member name="M:LabProg2019.Actions.drawMenuText(System.String,System.Int32,System.ConsoleColor,LabProg2019.Gfx.wronly_raster,System.Int32,System.Int32)">
+ <summary>
+ Writes the state's menu voices
+ </summary>
+ <param name="s">The string to write</param>
+ <param name="index">The index of the item in the menu</param>
  <param name="wr">Write only raster used for screen writing</param>
  <param name="size">Game window size</param>
 </member>
 <member name="M:LabProg2019.Actions.check_bounds(LabProg2019.Actions.State,System.Double,System.Double)">
  <summary>
- Check if the movement is allowed
+ Checks if the movement is allowed
  </summary>
  <param name="st">Current state</param>
  <param name="dx">Horizontal displacement</param>
  <param name="dy">Vertical displacement</param>
  <returns>A couple of float indicating the action to execute</returns>
 </member>
-<member name="M:LabProg2019.Scene.SceneManager.setVisiblity(LabProg2019.Actions.State,System.Int32,Microsoft.FSharp.Core.FSharpOption{System.Int32})">
+<member name="M:LabProg2019.StateManager.StateManager.setVisiblity(LabProg2019.Actions.State,System.Int32,Microsoft.FSharp.Core.FSharpOption{System.Int32})">
  <summary>
- Change the radius of visible maze (in hard mode)
+ Changes the radius of visible maze (in hard mode)
  </summary>
  <param name="s">Current status</param>
- <param name="visibility"> TO-----------------------------------------------------------MODIFY </param>
+ <param name="visibility">New visibility value</param>
  <param name="pos">Position of the sprite</param>
  <returns>A new state, that comes from the changes on the actual state</returns>
 </member>
-<member name="M:LabProg2019.Scene.SceneManager.setSize(LabProg2019.Actions.State,System.Int32,Microsoft.FSharp.Core.FSharpOption{System.Int32})">
+<member name="M:LabProg2019.StateManager.StateManager.setSize(LabProg2019.Actions.State,System.Int32,Microsoft.FSharp.Core.FSharpOption{System.Int32})">
  <summary>
- Change maze size
+ Changes maze size
  </summary>
  <param name="s">Current state</param>
  <param name="size">New size</param>
  <param name="pos">Cursor position in the menu</param>
  <returns>New state with modified size</returns>
 </member>
-<member name="M:LabProg2019.Scene.SceneManager.setGameVisibility(System.Int32,System.Int32)">
+<member name="M:LabProg2019.StateManager.StateManager.setGameVisibility(System.Int32,System.Int32)">
  <summary>
- Change the visibility of all game states
+ Changes the visibility of all game states
  </summary>
- <param name="v">TO----------------------------------------------------------------------------MODIFY</param>
+ <param name="v">New visibility value</param>
  <param name="pos">Position of the sprite</param>
 </member>
-<member name="M:LabProg2019.Scene.SceneManager.setGameSize(System.Int32,System.Int32)">
+<member name="M:LabProg2019.StateManager.StateManager.setGameSize(System.Int32,System.Int32)">
  <summary>
- Set new size to all game states
+ Sets new size to all game states
  </summary>
  <param name="size">New size</param>
  <param name="pos">New cursor position in the menu</param>
 </member>
-<member name="M:LabProg2019.Scene.SceneManager.setCurrentScene(System.String)">
+<member name="M:LabProg2019.StateManager.StateManager.setCurrentState(System.String)">
  <summary>
- Set the current state
+ Sets the current state
  </summary>
  <param name="name">State name</param>
 </member>
-<member name="M:LabProg2019.Scene.SceneManager.resetState(LabProg2019.Actions.State)">
+<member name="M:LabProg2019.StateManager.StateManager.resetState(LabProg2019.Actions.State)">
  <summary>
- Reset a state
+ Resets a state
  </summary>
  <param name="s">Current state</param>
  <returns>A new default state</returns>
 </member>
-<member name="M:LabProg2019.Scene.SceneManager.resetGame">
+<member name="M:LabProg2019.StateManager.StateManager.resetGame">
  <summary>
- Reset all game states
+ Resets all game states
  </summary>
 </member>
-<member name="M:LabProg2019.Scene.SceneManager.isPresent(System.String)">
+<member name="M:LabProg2019.StateManager.StateManager.isPresent(System.String)">
  <summary>
- Check for the if exists a state in the game states list
+ Checks for the if exists a state in the game states list
  </summary>
  <param name="name">State name</param>
  <returns>A boolean that express the research result</returns>
 </member>
-<member name="M:LabProg2019.Scene.SceneManager.getScene(System.String)">
+<member name="M:LabProg2019.StateManager.StateManager.getState(System.String)">
  <summary>
- Search a state in the game states list
+ Searches a state in the game states list
  </summary>
  <param name="name">State name</param>
  <returns>A list with the requested state</returns>
 </member>
-<member name="M:LabProg2019.Scene.SceneManager.execute(LabProg2019.Engine.engine,Microsoft.FSharp.Core.FSharpOption{System.ConsoleKeyInfo},LabProg2019.Gfx.wronly_raster)">
+<member name="M:LabProg2019.StateManager.StateManager.execute(LabProg2019.Engine.engine,Microsoft.FSharp.Core.FSharpOption{System.ConsoleKeyInfo},LabProg2019.Gfx.wronly_raster)">
  <summary>
- Check the pressed key and execute the corresponding action 
+ Checks the pressed key and execute the corresponding action 
  </summary>
  <param name="engine">Game engine</param>
  <param name="key">Pressed key</param>
  <param name="wr">Write only raster used for screen writing</param>
 </member>
-<member name="M:LabProg2019.Scene.SceneManager.deleteScene(System.String)">
+<member name="M:LabProg2019.StateManager.StateManager.deleteState(System.String)">
  <summary>
- Remove a state form the game states list 
+ Removes a state form the game states list 
  </summary>
  <param name="name">The state name</param>
  <returns>A list with all game states without the removed one</returns>
 </member>
-<member name="M:LabProg2019.Scene.SceneManager.changeScene``1(System.String,Microsoft.FSharp.Core.FSharpOption{``0})">
+<member name="M:LabProg2019.StateManager.StateManager.changeScene(System.String,Microsoft.FSharp.Core.FSharpOption{LabProg2019.Gfx.wronly_raster})">
  <summary>
- Change the current scene
+ Changes the current scene
  </summary>
  <param name="name">State name</param>
 </member>
-<member name="M:LabProg2019.Scene.SceneManager.addScene(System.String,Microsoft.FSharp.Core.FSharpFunc{LabProg2019.Actions.State,Microsoft.FSharp.Core.FSharpFunc{System.ConsoleKeyInfo,LabProg2019.Actions.State}},System.Boolean,Microsoft.FSharp.Core.FSharpOption{LabProg2019.Gfx.sprite},Microsoft.FSharp.Core.FSharpOption{LabProg2019.Gfx.sprite},Microsoft.FSharp.Core.FSharpOption{LabProg2019.Maze.Maze},Microsoft.FSharp.Core.FSharpOption{Microsoft.FSharp.Collections.FSharpList{System.String}},Microsoft.FSharp.Core.FSharpOption{System.Int32},Microsoft.FSharp.Core.FSharpOption{Microsoft.FSharp.Core.FSharpFunc{LabProg2019.Actions.State,Microsoft.FSharp.Core.FSharpFunc{System.ConsoleKeyInfo,Microsoft.FSharp.Core.FSharpFunc{LabProg2019.Gfx.wronly_raster,Microsoft.FSharp.Core.FSharpFunc{Microsoft.FSharp.Collections.FSharpList{System.String},Microsoft.FSharp.Core.FSharpFunc{System.Tuple{System.Int32,System.Int32},LabProg2019.Actions.State}}}}}},Microsoft.FSharp.Core.FSharpOption{System.Tuple{System.Int32,System.Int32}},Microsoft.FSharp.Core.FSharpOption{System.Int32})">
+<member name="M:LabProg2019.StateManager.StateManager.addScene(System.String,Microsoft.FSharp.Core.FSharpFunc{LabProg2019.Actions.State,Microsoft.FSharp.Core.FSharpFunc{System.ConsoleKeyInfo,LabProg2019.Actions.State}},System.Boolean,Microsoft.FSharp.Core.FSharpOption{LabProg2019.Gfx.sprite},Microsoft.FSharp.Core.FSharpOption{LabProg2019.Gfx.sprite},Microsoft.FSharp.Core.FSharpOption{LabProg2019.Maze.Maze},Microsoft.FSharp.Core.FSharpOption{Microsoft.FSharp.Collections.FSharpList{System.String}},Microsoft.FSharp.Core.FSharpOption{System.Int32},Microsoft.FSharp.Core.FSharpOption{Microsoft.FSharp.Core.FSharpFunc{LabProg2019.Actions.State,Microsoft.FSharp.Core.FSharpFunc{System.ConsoleKeyInfo,Microsoft.FSharp.Core.FSharpFunc{LabProg2019.Gfx.wronly_raster,Microsoft.FSharp.Core.FSharpFunc{Microsoft.FSharp.Collections.FSharpList{System.String},Microsoft.FSharp.Core.FSharpFunc{System.Tuple{System.Int32,System.Int32},LabProg2019.Actions.State}}}}}},Microsoft.FSharp.Core.FSharpOption{System.Tuple{System.Int32,System.Int32}},Microsoft.FSharp.Core.FSharpOption{System.Int32})">
  <summary>
- Add a new state to game states list
+ Adds a new state to game states list
  </summary>
  <param name="name">State name</param>
  <param name="move">The function to execute at every cycle of execution (Game only)</param>
@@ -449,7 +534,7 @@ State palyer
  <param name="menu">The function to execute at every cycle of execution (Menu only)</param>
  <param name="size">Window or maze size</param>
 </member>
-<member name="T:LabProg2019.Scene.SceneManager">
+<member name="T:LabProg2019.StateManager.StateManager">
  <summary>
  Type SceneManager
  </summary>

@@ -2,7 +2,7 @@
 
 open System.Collections.Generic
 open Maze
-
+open Cell
 
 /// <summary>
 /// Type Tree
@@ -18,31 +18,31 @@ type Tree = {
 }
 
 /// <summary>
-/// Get all children of a tree node
+/// Gets all children of a tree node
 /// </summary>
 /// <param name="node">Tree node</param>
 /// <param name="maze">Matrix that identify the maze</param>
-let getChildren (node: Tree, maze: Cell[,]) =
+let getChildren (node: Tree, maze: Cell[,]) : unit =
     if (node.parent = None) then node.children <- node.value.children(maze,node.value)
     else node.children <- node.value.children(maze,node.parent.Value.value)
 
 
 /// <summary>
-/// Get recursively all parent cell of the maze exit leaf
+/// Gets recursively all parent cell of the maze exit leaf
 /// </summary>
 /// <param name="leaf">Tree leaf</param>
-/// <returns>Cell list</returns>
-let rec retrievePath (leaf: Tree option) =
+/// <returns>The solution's path</returns>
+let rec retrievePath (leaf: Tree option) : Cell list=
     if (leaf.Value.parent = None) then [leaf.Value.value]
     else leaf.Value.value::retrievePath(leaf.Value.parent)
 
 /// <summary>
-/// Modify the matrix cells to modify the path
+/// Modifies the matrix cells to mark the path
 /// </summary>
 /// <param name="root">Tree root</param>
 /// <param name="maze">Maze data structure</param>
 /// <returns>Modified maze data structure</returns>
-let buildPath (root: Tree option, maze: Maze) =
+let buildPath (root: Tree option, maze: Maze) : Maze =
     if root = None then 
         maze
     else
@@ -52,11 +52,11 @@ let buildPath (root: Tree option, maze: Maze) =
         maze
 
 /// <summary>
-/// Iterative solving algotihm based on n-ary tree
+/// Iterative solving algotihm based on an n-ary tree data structure and breath first search
 /// </summary>
 /// <param name="maze">Maze data structure</param>
 /// <returns>Maze modified data structure</returns>
-let solveIterative (maze: Maze) =
+let solveIterative (maze: Maze) : Maze =
     let tree = {
         parent = None; value = maze.start; children = []
     }
@@ -81,12 +81,12 @@ let solveIterative (maze: Maze) =
 
 
 /// <summary>
-/// In-depth searching algorithm of n-ary tree, used to generate the hierarchy parent-child
+/// Depth first searching algorithm on an n-ary tree, used to generate the hierarchy parent-child
 /// </summary>
 /// <param name="maze">Maze data structure</param>
 /// <param name="queue">A tail</param>
 /// <returns>The leaf corresponding to the maze exit</returns>
-let rec findHierarchy (maze: Maze, queue: Queue<Tree>) =
+let rec findHierarchy (maze: Maze, queue: Queue<Tree>) : Tree option =
     if queue.Count = 0 then None
     else
         let root = queue.Dequeue()
@@ -111,7 +111,7 @@ let rec findHierarchy (maze: Maze, queue: Queue<Tree>) =
 /// </summary>
 /// <param name="maze">Maze data structure</param>
 /// <returns>Modified maze data structure</returns>
-let rec solveRecursive (maze: Maze)=
+let rec solveRecursive (maze: Maze) : Maze =
     let tree = {
         parent = None; value = maze.start; children = []
     }
