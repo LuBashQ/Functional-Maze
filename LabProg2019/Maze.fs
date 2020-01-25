@@ -35,9 +35,9 @@ type Maze (_width: int, _height: int) =
             for y = 0 to (_height-1) do
                 if this.maze.[x,y].isVisited then
                     if this.maze.[x,y].isPath then 
-                        this.pixelMap.SetValue (pixel.create('\219',Color.DarkMagenta),x,y)
+                        this.pixelMap.SetValue (pixel.create(Config.filled_pixel_char,Config.path_color),x,y)
                 else 
-                    this.pixelMap.SetValue (pixel.create('\219',Color.White),x,y)
+                    this.pixelMap.SetValue (pixel.create(Config.filled_pixel_char,Config.wall_color),x,y)
         
         toArray this.pixelMap
     
@@ -93,24 +93,24 @@ type Maze (_width: int, _height: int) =
                 if List.exists ((=) this.maze.[x,y]) area then
                     if this.maze.[x,y].isVisited then
                         if this.maze.[x,y].isPath then 
-                            this.pixelMap.SetValue (pixel.create('\219',Color.DarkMagenta),x,y)
+                            this.pixelMap.SetValue (pixel.create(Config.filled_pixel_char,Config.road_color),x,y)
                     else 
-                        this.pixelMap.SetValue (pixel.create('\219',Color.White),x,y)
+                        this.pixelMap.SetValue (pixel.create(Config.filled_pixel_char,Config.wall_color),x,y)
                 else if List.exists ((=) this.maze.[x,y]) grayArea then
                     if this.maze.[x,y].isVisited then
                         if this.maze.[x,y].isPath then 
-                            this.pixelMap.SetValue (pixel.create('\219',Color.DarkMagenta),x,y)
+                            this.pixelMap.SetValue (pixel.create(Config.filled_pixel_char,Config.road_color),x,y)
                     else 
-                        this.pixelMap.SetValue (pixel.create('\219',Color.Gray),x,y)
+                        this.pixelMap.SetValue (pixel.create(Config.filled_pixel_char,Config.soft_dark_area),x,y)
                 else if List.exists ((=) this.maze.[x,y]) darkArea then
                     if this.maze.[x,y].isVisited then
                         if this.maze.[x,y].isPath then 
-                            this.pixelMap.SetValue (pixel.create('\219',Color.DarkMagenta),x,y)
+                            this.pixelMap.SetValue (pixel.create(Config.filled_pixel_char,Config.road_color),x,y)
                     else 
-                        this.pixelMap.SetValue (pixel.create('\219',Color.DarkGray),x,y)
+                        this.pixelMap.SetValue (pixel.create(Config.filled_pixel_char,Config.dark_area),x,y)
                 
                 else
-                        this.pixelMap.SetValue (pixel.create('\219',Color.Black),x,y)
+                        this.pixelMap.SetValue (pixel.create(Config.filled_pixel_char,Config.road_color),x,y)
                 
         toArray this.pixelMap
 

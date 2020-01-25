@@ -25,3 +25,10 @@ let log_msg_color = Color.Gray
 let log_warn_color = Color.Yellow
 let log_error_color = Color.Red
 let log_debug_color = Color.Cyan
+
+let path_color = Color.DarkMagenta
+let wall_color = Color.White
+let road_color = Color.Black
+let visible_area = wall_color
+let soft_dark_area = Color.Gray
+let dark_area = Color.DarkGray
