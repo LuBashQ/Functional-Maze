@@ -1,10 +1,4 @@
-﻿(*
-* LabProg2019 - Progetto di Programmazione a.a. 2019-20
-* Maze.fs: maze
-* (C) 2019 Alvise Spano' @ Universita' Ca' Foscari di Venezia
-*)
-
-module LabProg2019.Maze
+﻿module LabProg2019.Maze
 open System.Collections.Generic
 open Gfx
 open Cell
